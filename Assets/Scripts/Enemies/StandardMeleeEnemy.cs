@@ -27,35 +27,39 @@ public class StandardMeleeEnemy : MonoBehaviour, IEnemy
 
     public IEnumerator Reason()
     {
-        if(!_game_manager.IsGameOver())
-        {
-            Vector3Int grid_position = _game_manager.GetGridPosition(transform.position);
-            Vector3Int player_grid_position = _game_manager.GetPlayerGridPosition();
-            Vector2 player_world_position = _game_manager.GetWorldPositionFromGridPosition(player_grid_position);
-            List<Vector3Int> neighbour_grid_position = _game_manager.GetNeighbourTilesIgnoreDash(grid_position);
+        Vector3Int grid_position = _game_manager.GetGridPosition(transform.position);
+        Vector3Int player_grid_position = _game_manager.GetPlayerGridPosition();
+        Vector2 player_world_position = _game_manager.GetWorldPositionFromGridPosition(player_grid_position);
+        List<Vector3Int> neighbour_grid_position = _game_manager.GetNeighbourTilesIgnoreDash(grid_position);
 
+        if (neighbour_grid_position.Contains(player_grid_position))
+        {
+            _game_manager.DamagePlayer(_damage);
+        }
+        else
+        {
+            float distance = float.MaxValue;
+            Vector2 closest_position = transform.position;
+            for (int i = 0; i < neighbour_grid_position.Count; i++)
+            {
+                if (!_game_manager.HasTile(neighbour_grid_position[i]))
+                {
+                    continue;
+                }
+                Vector2 neighbour_world_position = _game_manager.GetWorldPositionFromGridPosition(neighbour_grid_position[i]);
+                if (Vector2.Distance(neighbour_world_position, player_world_position) < distance)
+                {
+                    distance = Vector2.Distance(neighbour_world_position, player_world_position);
+                    closest_position = neighbour_world_position;
+                }
+            }
+            yield return StartCoroutine(MoveToPosition(closest_position));
+            //Try to attack
+            grid_position = _game_manager.GetGridPosition(transform.position);
+            neighbour_grid_position = _game_manager.GetNeighbourTilesIgnoreDash(grid_position);
             if (neighbour_grid_position.Contains(player_grid_position))
             {
                 _game_manager.DamagePlayer(_damage);
-            }
-            else
-            {
-                float distance = float.MaxValue;
-                Vector2 closest_position = transform.position;
-                for (int i = 0; i < neighbour_grid_position.Count; i++)
-                {
-                    if (!_game_manager.HasTile(neighbour_grid_position[i]))
-                    {
-                        continue;
-                    }
-                    Vector2 neighbour_world_position = _game_manager.GetWorldPositionFromGridPosition(neighbour_grid_position[i]);
-                    if (Vector2.Distance(neighbour_world_position, player_world_position) < distance)
-                    {
-                        distance = Vector2.Distance(neighbour_world_position, player_world_position);
-                        closest_position = neighbour_world_position;
-                    }
-                }
-                yield return StartCoroutine(MoveToPosition(closest_position));
             }
         }
         yield return null;
@@ -68,6 +72,7 @@ public class StandardMeleeEnemy : MonoBehaviour, IEnemy
             _rigidbody.MovePosition(Vector2.MoveTowards(transform.position, target_position, _movement_speed * Time.fixedDeltaTime));
             yield return new WaitForFixedUpdate();
         }
+
         yield return null;
     }
 
