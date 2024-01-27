@@ -12,10 +12,4 @@ public class KnifeBehaviour : MonoBehaviour
             collision.gameObject.GetComponent<IEnemy>().Kill();
         }
     }
-    private void Update()
-    {
-        if(!GetComponent<SpriteRenderer>().isVisible)
-            gameObject.SetActive(false);
-    }
-
 }

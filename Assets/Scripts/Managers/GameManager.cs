@@ -147,6 +147,10 @@ public class GameManager : MonoBehaviour
             {
                 IEnemy enemy_logic = _enemies[i].GetComponent<IEnemy>();
                 yield return StartCoroutine(enemy_logic.Reason());
+                if (IsGameOver())
+                {
+                    break;
+                }
             }
         }
 

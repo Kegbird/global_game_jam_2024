@@ -10,6 +10,7 @@ TagManager:
   - Enemy
   - Obstacle
   - Knife
+  - Arrow
   layers:
   - Default
   - TransparentFX
@@ -21,7 +22,7 @@ TagManager:
   - Enemy
   - Obstacle
   - Knife
-  - 
+  - Arrow
   - 
   - 
   - 
