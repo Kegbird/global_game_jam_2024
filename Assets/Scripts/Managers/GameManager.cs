@@ -102,21 +102,17 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator ActivateEnemies()
     {
-        if (_enemies == null || _enemies.Count == 0)
+        for (int i = 0; i < _enemies.Count; i++)
         {
-            yield return null;
-        }
-        else
-        {
-            for (int i = 0; i < _enemies.Count; i++)
+            if (_enemies[i].GetComponent<IEnemy>().IsAlive())
             {
                 IEnemy enemy_logic = _enemies[i].GetComponent<IEnemy>();
                 yield return StartCoroutine(enemy_logic.Reason());
             }
-
-            if (_game_over)
-                StartCoroutine(LoadLevel(_game_over_scene_index));
         }
+
+        if (_game_over)
+            StartCoroutine(LoadLevel(_game_over_scene_index));
     }
 
     public void HighlightPlayerMovementCells()
@@ -146,6 +142,31 @@ public class GameManager : MonoBehaviour
             _tilemap.SetTileFlags(neighbour_positions[i], TileFlags.None);
             _tilemap.SetColor(neighbour_positions[i], Color.white);
         }
+    }
+
+    public List<GameObject> GetPlayerNearEnemies()
+    {
+        List<GameObject> near_enemies = new List<GameObject>();
+        Vector3Int player_grid_position = GetPlayerGridPosition();
+        List<Vector3Int> neighbours_grid_positions = GetNeighbourTilesConsideringAllCells(player_grid_position);
+
+        for (int j = 0; j < _enemies.Count; j++)
+        {
+            if (_enemies[j].GetComponent<IEnemy>().IsAlive())
+            {
+                Vector3Int enemy_grid_position = GetGridPosition(_enemies[j].transform.position);
+                if (neighbours_grid_positions.Contains(enemy_grid_position))
+                {
+                    near_enemies.Add(_enemies[j]);
+                }
+            }
+        }
+        return near_enemies;
+    }
+
+    public void EnemyKilled()
+    {
+        _enemies_to_kill--;
     }
 
     public List<Vector3Int> GetNeighbourTilesIgnoreDash(Vector3Int grid_position)
@@ -186,7 +207,35 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < _enemies.Count; i++)
         {
-            neighbour_tiles.Remove(_tilemap.WorldToCell(_enemies[i].transform.position));
+            if(_enemies[i].GetComponent<IEnemy>().IsAlive())
+            {
+                neighbour_tiles.Remove(_tilemap.WorldToCell(_enemies[i].transform.position));
+            }
+        }
+        return neighbour_tiles;
+    }
+
+    public List<Vector3Int> GetNeighbourTilesConsideringAllCells(Vector3Int grid_position)
+    {
+        List<Vector3Int> neighbour_tiles = new List<Vector3Int>();
+
+        if (Mathf.Abs(grid_position.y) % 2 == 0)
+        {
+            neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y + 1, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y - 1, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x, grid_position.y + 1, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x, grid_position.y - 1, 0));
+        }
+        else
+        {
+            neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x, grid_position.y + 1, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x, grid_position.y - 1, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y + 1, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y - 1, 0));
         }
 
         return neighbour_tiles;
@@ -292,7 +341,10 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < _enemies.Count; i++)
         {
-            neighbour_tiles.Remove(_tilemap.WorldToCell(_enemies[i].transform.position));
+            if (_enemies[i].GetComponent<IEnemy>().IsAlive())
+            {
+                neighbour_tiles.Remove(_tilemap.WorldToCell(_enemies[i].transform.position));
+            }
         }
 
         return neighbour_tiles;
@@ -338,7 +390,7 @@ public class GameManager : MonoBehaviour
     {
         _hps = Mathf.Clamp(_hps - damage, 0, 100);
         UpdateUIStats();
-        if(_hps==0)
+        if (_hps == 0)
         {
             _game_over = true;
             //game over

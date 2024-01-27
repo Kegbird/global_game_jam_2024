@@ -89,6 +89,11 @@ public class PlayerInputController : MonoBehaviour
             _rigidbody.MovePosition(Vector2.MoveTowards(transform.position, target_position, _movement_speed * Time.fixedDeltaTime));
             yield return new WaitForFixedUpdate();
         }
+        List<GameObject> near_enemies = _game_manager.GetPlayerNearEnemies();
+
+        for(int i=0; i<near_enemies.Count; i++)
+            near_enemies[i].GetComponent<IEnemy>().Kill();
+
         yield return StartCoroutine(_game_manager.ActivateEnemies());
         if (!_game_manager.IsGameOver())
         {

@@ -11,9 +11,12 @@ public class RangedEnemy : MonoBehaviour, IEnemy
     private float _movement_speed;
     [SerializeField]
     private int _damage;
+    [SerializeField]
+    private bool _alive;
 
     private void Awake()
     {
+        _alive = true;
         _rigidbody = GetComponent<Rigidbody2D>();
     }
 
@@ -107,8 +110,15 @@ public class RangedEnemy : MonoBehaviour, IEnemy
         throw new System.NotImplementedException();
     }
 
-    public void Die()
+    public void Kill()
     {
-        throw new System.NotImplementedException();
+        _alive = false;
+        _game_manager.EnemyKilled();
+        gameObject.SetActive(false);
+    }
+
+    public bool IsAlive()
+    {
+        return _alive;
     }
 }
