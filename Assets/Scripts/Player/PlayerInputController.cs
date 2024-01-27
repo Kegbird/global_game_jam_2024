@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 public class PlayerInputController : MonoBehaviour
 {
     [SerializeField]
-    private bool _active;
+    public bool _active;
     [SerializeField]
     private bool _editor;
     [SerializeField]
@@ -83,7 +83,7 @@ public class PlayerInputController : MonoBehaviour
         if (collision.gameObject.tag == "Exit")
         {
             _active = false;
-            StartCoroutine(_game_manager.LoadNextLevel());
+            StartCoroutine(_game_manager.LoadLevel(_game_manager._next_level_scene_index));
         }
     }
 
@@ -95,7 +95,10 @@ public class PlayerInputController : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
         yield return StartCoroutine(_game_manager.ActivateEnemies());
-        _active = true;
+        if (!_game_manager.IsGameOver())
+        {
+            _active = true;
+        }
         yield return null;
     }
 }

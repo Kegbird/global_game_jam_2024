@@ -7,12 +7,17 @@ using UnityEngine.Tilemaps;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager instance;
     [SerializeField]
     private bool _is_initial_scene;
     [SerializeField]
-    private int _next_level;
+    public int _next_level_scene_index;
     [SerializeField]
-    private GameObject _player;
+    public int _game_over_scene_index;
+    [SerializeField]
+    public GameObject _player;
+    [SerializeField]
+    private GameObject _enemies_wrapper;
     [SerializeField]
     private List<GameObject> _enemies;
     [SerializeField]
@@ -35,14 +40,25 @@ public class GameManager : MonoBehaviour
     private Vector3Int _exit_grid_position;
     [SerializeField]
     private bool _win;
+    [SerializeField]
+    private bool _game_over;
 
     private void Awake()
     {
+        instance = this;
         if (_is_initial_scene)
         {
             _hps = 3;
             _dashes = 3;
         }
+        LoadEnemies();
+    }
+
+    private void LoadEnemies()
+    {
+        _enemies = new List<GameObject>();
+        for (int i = 0; i < _enemies_wrapper.transform.childCount; i++)
+            _enemies.Add(_enemies_wrapper.transform.GetChild(i).gameObject);
     }
 
     private void Start()
@@ -73,9 +89,28 @@ public class GameManager : MonoBehaviour
         return _tilemap.CellToWorld(tapped_cell_position);
     }
 
+    public bool IsGameOver()
+    {
+        return _game_over;
+    }
+
     public IEnumerator ActivateEnemies()
     {
-        yield return null;
+        if (_enemies == null || _enemies.Count == 0)
+        {
+            yield return null;
+        }
+        else
+        {
+            for (int i = 0; i < _enemies.Count; i++)
+            {
+                IEnemy enemy_logic = _enemies[i].GetComponent<IEnemy>();
+                yield return StartCoroutine(enemy_logic.Reason());
+            }
+
+            if (_game_over)
+                StartCoroutine(LoadLevel(_game_over_scene_index));
+        }
     }
 
     public void HighlightPlayerMovementCells()
@@ -107,7 +142,51 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private List<Vector3Int> GetNeighbourTiles(Vector3Int grid_position)
+    public List<Vector3Int> GetNeighbourTilesIgnoreDash(Vector3Int grid_position)
+    {
+        List<Vector3Int> neighbour_tiles = new List<Vector3Int>();
+
+        if (Mathf.Abs(grid_position.y) % 2 == 0)
+        {
+            neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y + 1, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y - 1, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x, grid_position.y + 1, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x, grid_position.y - 1, 0));
+        }
+        else
+        {
+            neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x, grid_position.y + 1, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x, grid_position.y - 1, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y + 1, 0));
+            neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y - 1, 0));
+        }
+
+        if (!_win)
+        {
+            neighbour_tiles.Remove(_exit_grid_position);
+        }
+
+        if (_obstacles != null && _obstacles.Count > 0)
+        {
+            for (int i = 0; i < _obstacles.Count; i++)
+            {
+                neighbour_tiles.Remove(_tilemap.WorldToCell(_obstacles[i].transform.position));
+            }
+        }
+
+        for (int i = 0; i < _enemies.Count; i++)
+        {
+            neighbour_tiles.Remove(_tilemap.WorldToCell(_enemies[i].transform.position));
+        }
+
+        return neighbour_tiles;
+    }
+
+    public List<Vector3Int> GetNeighbourTiles(Vector3Int grid_position)
     {
         List<Vector3Int> neighbour_tiles = new List<Vector3Int>();
 
@@ -119,7 +198,7 @@ public class GameManager : MonoBehaviour
                 //0, 2
                 neighbour_tiles.Add(new Vector3Int(grid_position.x, grid_position.y + 2, 0));
                 //-1, 2
-                neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y +2, 0));
+                neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y + 2, 0));
                 //-2, 1
                 neighbour_tiles.Add(new Vector3Int(grid_position.x - 2, grid_position.y + 1, 0));
                 //-2, 0
@@ -197,26 +276,57 @@ public class GameManager : MonoBehaviour
             neighbour_tiles.Remove(_exit_grid_position);
         }
 
-        if(_obstacles != null && _obstacles.Count>0)
+        if (_obstacles != null && _obstacles.Count > 0)
         {
-            for(int i=0; i < _obstacles.Count; i++)
+            for (int i = 0; i < _obstacles.Count; i++)
             {
                 neighbour_tiles.Remove(_tilemap.WorldToCell(_obstacles[i].transform.position));
             }
         }
 
-        if(_enemies != null && _enemies.Count>0)
+        for (int i = 0; i < _enemies.Count; i++)
         {
-            for(int i=0; i<_enemies.Count; i++)
-            {
-                neighbour_tiles.Remove(_tilemap.WorldToCell(_enemies[i].transform.position));
-            }
+            neighbour_tiles.Remove(_tilemap.WorldToCell(_enemies[i].transform.position));
         }
+
         return neighbour_tiles;
+    }
+
+    public void DamagePlayer(int damage)
+    {
+        _hps = Mathf.Clamp(_hps - damage, 0, 100);
+        UpdateUIStats();
+        if(_hps==0)
+        {
+            _game_over = true;
+            //game over
+        }
+    }
+
+    public Vector3Int GetGridPosition(Vector3 position)
+    {
+        return _tilemap.WorldToCell(position);
+    }
+
+    public Vector2 GetWorldPositionFromGridPosition(Vector3Int grid_position)
+    {
+        return _tilemap.CellToWorld(grid_position);
+    }
+
+    public bool HasTile(Vector3Int grid_position)
+    {
+        return _tilemap.HasTile(grid_position);
+    }
+
+    public Vector3Int GetPlayerGridPosition()
+    {
+        return GetGridPosition(_player.transform.position);
     }
 
     public void EnableDash()
     {
+        if (!_player.GetComponent<PlayerInputController>()._active)
+            return;
         _dash = true;
         _ui_manager.DisableInteractionDashButton();
     }
@@ -242,11 +352,11 @@ public class GameManager : MonoBehaviour
         UpdateUIStats();
     }
 
-    public IEnumerator LoadNextLevel()
+    public IEnumerator LoadLevel(int scene_index)
     {
         _ui_manager.ShowBlackScreen();
         yield return new WaitForSeconds(1f);
-        SceneManager.LoadScene(_next_level);
+        SceneManager.LoadScene(scene_index);
         yield return null;
     }
 
@@ -256,8 +366,4 @@ public class GameManager : MonoBehaviour
         _ui_manager.SetHpNumber(_hps);
     }
 
-    public void GameOver()
-    {
-
-    }
 }
