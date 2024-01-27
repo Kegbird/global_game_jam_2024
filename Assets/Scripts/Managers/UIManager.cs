@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +8,12 @@ public class UIManager : MonoBehaviour
 {
     [SerializeField]
     private Image _blackscreen;
-
+    [SerializeField]
+    private Button _dash_button;
+    [SerializeField]
+    private TextMeshProUGUI _dash_number_text;
+    [SerializeField]
+    private TextMeshProUGUI _hp_number_text;
 
     public void ShowBlackScreen()
     {
@@ -17,6 +23,26 @@ public class UIManager : MonoBehaviour
     public void HideBlackScreen()
     {
         StartCoroutine(HideBlackScreenUICoroutineUI(1f));
+    }
+
+    public void SetHpNumber(int hps)
+    {
+        this._hp_number_text.text = hps.ToString();
+    }
+
+    public void SetDashNumber(int dashes)
+    {
+        this._dash_number_text.text = dashes.ToString();
+    }
+
+    public void EnableInteractionDashButton()
+    {
+        _dash_button.interactable = true;
+    }
+
+    public void DisableInteractionDashButton()
+    {
+        _dash_button.interactable = false;
     }
 
     public IEnumerator ShowBlackScreenUICoroutineUI(float transition_duration)

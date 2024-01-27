@@ -37,7 +37,7 @@ public class PlayerInputController : MonoBehaviour
         {
             Vector3 mouse_position = Camera.main.ScreenToWorldPoint(_editor ? Input.mousePosition : Input.touches[0].position);
             RaycastHit2D hit = Physics2D.Raycast(mouse_position, Vector2.zero);
-            if (hit.collider != null)
+            if (hit.collider != null && hit.collider.tag == "Player")
             {
                 _selected = true;
                 _game_manager.HighlightPlayerMovementCells();
@@ -51,12 +51,27 @@ public class PlayerInputController : MonoBehaviour
                     {
                         _game_manager.UnhighlightPlayerMovementCells();
                         Vector2 target_position = _game_manager.GetTargetPosition(mouse_position);
+                        if (_game_manager._dash)
+                        {
+                            _game_manager.ConsumeDash();
+                        }
                         StartCoroutine(MoveToPosition(target_position));
                         _active = false;
                     }
                     else
                     {
                         _game_manager.UnhighlightPlayerMovementCells();
+                        if (_game_manager._dash)
+                        {
+                            _game_manager.DisableDash();
+                        }
+                    }
+                }
+                else
+                {
+                    if (_game_manager._dash)
+                    {
+                        _game_manager.DisableDash();
                     }
                 }
             }
@@ -65,7 +80,7 @@ public class PlayerInputController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.gameObject.tag == "Exit")
+        if (collision.gameObject.tag == "Exit")
         {
             _active = false;
             StartCoroutine(_game_manager.LoadNextLevel());
@@ -79,6 +94,7 @@ public class PlayerInputController : MonoBehaviour
             _rigidbody.MovePosition(Vector2.MoveTowards(transform.position, target_position, _movement_speed * Time.fixedDeltaTime));
             yield return new WaitForFixedUpdate();
         }
+        yield return StartCoroutine(_game_manager.ActivateEnemies());
         _active = true;
         yield return null;
     }
