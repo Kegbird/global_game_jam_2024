@@ -33,9 +33,13 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private static int _hps;
     [SerializeField]
+    private static int _knifes;
+    [SerializeField]
     private static int _dashes;
     [SerializeField]
     public bool _dash;
+    [SerializeField]
+    public bool _knife;
     [SerializeField]
     private GameObject _exit;
     [SerializeField]
@@ -50,6 +54,7 @@ public class GameManager : MonoBehaviour
         {
             _hps = 3;
             _dashes = 3;
+            _knifes = 3;
         }
         LoadEnemies();
     }
@@ -65,14 +70,16 @@ public class GameManager : MonoBehaviour
     private void RandomizeEnemyPositions()
     {
         BoundsInt bounds_int = _tilemap.cellBounds;
-        List<Vector3Int> player_neighbours = GetNeighbourTiles(GetPlayerGridPosition());
+        Vector3Int player_grid_position = GetPlayerGridPosition();
+        List<Vector3Int> player_neighbours = GetNeighbourTiles(player_grid_position);
         List<Vector3Int> rand_grid_position_generated = new List<Vector3Int>();
-        for (int i=0; i<_enemies.Count; i++)
+        for (int i = 0; i < _enemies.Count; i++)
         {
             Vector3Int rand_grid_position = new Vector3Int(Random.Range(bounds_int.xMin, bounds_int.xMax), Random.Range(bounds_int.yMin, bounds_int.yMax));
-            if (_tilemap.HasTile(rand_grid_position) && 
+            if (_tilemap.HasTile(rand_grid_position) &&
                 !player_neighbours.Contains(rand_grid_position) &&
-                !rand_grid_position_generated.Contains(rand_grid_position))
+                !rand_grid_position_generated.Contains(rand_grid_position) &&
+                player_grid_position != rand_grid_position)
             {
                 _enemies[i].transform.position = _tilemap.CellToWorld(rand_grid_position);
                 rand_grid_position_generated.Add(rand_grid_position);
@@ -110,6 +117,15 @@ public class GameManager : MonoBehaviour
         List<Vector3Int> neighbour_positions = GetNeighbourTiles(player_grid_position);
 
         return neighbour_positions.Contains<Vector3Int>(tapped_cell_position) && _tilemap.HasTile(tapped_cell_position);
+    }
+
+    public bool TryToThrow(Vector2 tapped_position)
+    {
+        Vector3Int tapped_cell_position = _tilemap.WorldToCell(tapped_position);
+        Vector3Int player_grid_position = _tilemap.WorldToCell(_player.transform.position);
+        List<Vector3Int> knife_tiles = GetKnifeTiles(player_grid_position);
+
+        return knife_tiles.Contains<Vector3Int>(tapped_cell_position) && _tilemap.HasTile(tapped_cell_position);
     }
 
     public Vector3 GetTargetPosition(Vector2 tapped_position)
@@ -157,6 +173,36 @@ public class GameManager : MonoBehaviour
     {
         Vector3Int player_grid_position = _tilemap.WorldToCell(_player.transform.position);
         List<Vector3Int> neighbour_positions = GetNeighbourTiles(player_grid_position);
+
+        for (int i = 0; i < neighbour_positions.Count; i++)
+        {
+            if (!_tilemap.HasTile(neighbour_positions[i]))
+                continue;
+            _tilemap.SetTileFlags(neighbour_positions[i], TileFlags.None);
+            _tilemap.SetColor(neighbour_positions[i], Color.white);
+        }
+    }
+
+    public void HighlightKnifeCells()
+    {
+        Vector3Int player_grid_position = _tilemap.WorldToCell(_player.transform.position);
+
+        List<Vector3Int> neighbour_positions = GetKnifeTiles(player_grid_position);
+
+        for (int i = 0; i < neighbour_positions.Count; i++)
+        {
+            if (!_tilemap.HasTile(neighbour_positions[i]))
+                continue;
+            _tilemap.SetTileFlags(neighbour_positions[i], TileFlags.None);
+            _tilemap.SetColor(neighbour_positions[i], new Color(1f, 0f, 0f, 1f));
+        }
+    }
+
+    public void UnhighlightKnifeCells()
+    {
+        Vector3Int player_grid_position = _tilemap.WorldToCell(_player.transform.position);
+
+        List<Vector3Int> neighbour_positions = GetKnifeTiles(player_grid_position);
 
         for (int i = 0; i < neighbour_positions.Count; i++)
         {
@@ -230,7 +276,7 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < _enemies.Count; i++)
         {
-            if(_enemies[i].GetComponent<IEnemy>().IsAlive())
+            if (_enemies[i].GetComponent<IEnemy>().IsAlive())
             {
                 neighbour_tiles.Remove(_tilemap.WorldToCell(_enemies[i].transform.position));
             }
@@ -373,6 +419,32 @@ public class GameManager : MonoBehaviour
         return neighbour_tiles;
     }
 
+    public List<Vector3Int> GetKnifeTiles(Vector3Int grid_position)
+    {
+        List<Vector3Int> knife_tiles = new List<Vector3Int>();
+
+        if (Mathf.Abs(grid_position.y) % 2 == 0)
+        {
+            knife_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y, 0));
+            knife_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y + 1, 0));
+            knife_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y - 1, 0));
+            knife_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y, 0));
+            knife_tiles.Add(new Vector3Int(grid_position.x, grid_position.y + 1, 0));
+            knife_tiles.Add(new Vector3Int(grid_position.x, grid_position.y - 1, 0));
+        }
+        else
+        {
+            knife_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y, 0));
+            knife_tiles.Add(new Vector3Int(grid_position.x, grid_position.y + 1, 0));
+            knife_tiles.Add(new Vector3Int(grid_position.x, grid_position.y - 1, 0));
+            knife_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y, 0));
+            knife_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y + 1, 0));
+            knife_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y - 1, 0));
+        }
+
+        return knife_tiles;
+    }
+
     public List<Vector3Int> GetAttackablePositionsForRanged(Vector3Int enemy_position)
     {
         List<Vector3Int> attackable_tiles_for_ranged = new List<Vector3Int>();
@@ -416,7 +488,6 @@ public class GameManager : MonoBehaviour
         if (_hps == 0)
         {
             _game_over = true;
-            //game over
         }
     }
 
@@ -450,10 +521,26 @@ public class GameManager : MonoBehaviour
         _ui_manager.DisableInteractionDashButton();
     }
 
+    public void EnableKnife()
+    {
+        if (!_player.GetComponent<PlayerInputController>()._active)
+            return;
+        _knife = true;
+        _player.GetComponent<PlayerInputController>()._selected = true;
+        HighlightKnifeCells();
+        _ui_manager.DisableInteractionKnifeButton();
+    }
+
     public void DisableDash()
     {
         _dash = false;
         _ui_manager.EnableInteractionDashButton();
+    }
+
+    public void DisableKnife()
+    {
+        _knife = false;
+        _ui_manager.EnableInteractionKnifeButton();
     }
 
     public void ConsumeDash()
@@ -471,6 +558,21 @@ public class GameManager : MonoBehaviour
         UpdateUIStats();
     }
 
+    public void ConsumeKnife()
+    {
+        _knifes--;
+        _knife = false;
+        if (_knifes == 0)
+        {
+            _ui_manager.DisableInteractionKnifeButton();
+        }
+        else
+        {
+            _ui_manager.EnableInteractionKnifeButton();
+        }
+        UpdateUIStats();
+    }
+
     public IEnumerator LoadLevel(int scene_index)
     {
         _ui_manager.ShowBlackScreen();
@@ -483,6 +585,7 @@ public class GameManager : MonoBehaviour
     {
         _ui_manager.SetDashNumber(_dashes);
         _ui_manager.SetHpNumber(_hps);
+        _ui_manager.SetKnifeNumber(_knifes);
     }
 
 }

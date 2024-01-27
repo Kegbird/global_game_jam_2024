@@ -9,9 +9,13 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Image _blackscreen;
     [SerializeField]
-    private Button _dash_button;
+    private Button _dash_button; 
+    [SerializeField]
+    private Button _knife_button;
     [SerializeField]
     private TextMeshProUGUI _dash_number_text;
+    [SerializeField]
+    private TextMeshProUGUI _knife_number_text;
     [SerializeField]
     private TextMeshProUGUI _hp_number_text;
 
@@ -30,6 +34,11 @@ public class UIManager : MonoBehaviour
         this._hp_number_text.text = hps.ToString();
     }
 
+    public void SetKnifeNumber(int knifes)
+    {
+        this._knife_number_text.text = knifes.ToString();
+    }
+
     public void SetDashNumber(int dashes)
     {
         this._dash_number_text.text = dashes.ToString();
@@ -43,6 +52,16 @@ public class UIManager : MonoBehaviour
     public void DisableInteractionDashButton()
     {
         _dash_button.interactable = false;
+    }
+
+    public void EnableInteractionKnifeButton()
+    {
+        _knife_button.interactable = true;
+    }
+
+    public void DisableInteractionKnifeButton()
+    {
+        _knife_button.interactable = false;
     }
 
     public IEnumerator ShowBlackScreenUICoroutineUI(float transition_duration)

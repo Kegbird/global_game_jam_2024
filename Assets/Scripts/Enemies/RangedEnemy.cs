@@ -105,11 +105,6 @@ public class RangedEnemy : MonoBehaviour, IEnemy
         yield return null;
     }
 
-    public void TakeDamage(int damage)
-    {
-        throw new System.NotImplementedException();
-    }
-
     public void Kill()
     {
         _alive = false;

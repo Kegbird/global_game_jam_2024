@@ -9,6 +9,7 @@ TagManager:
   - Exit
   - Enemy
   - Obstacle
+  - Knife
   layers:
   - Default
   - TransparentFX
@@ -19,7 +20,7 @@ TagManager:
   - Exit
   - Enemy
   - Obstacle
-  - 
+  - Knife
   - 
   - 
   - 
@@ -45,4 +46,10 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Enemy
+    uniqueID: 1434697501
+    locked: 0
+  - name: Player
+    uniqueID: 2138621095
     locked: 0
