@@ -62,6 +62,28 @@ public class GameManager : MonoBehaviour
         _enemies_to_kill = _enemies.Count;
     }
 
+    private void RandomizeEnemyPositions()
+    {
+        BoundsInt bounds_int = _tilemap.cellBounds;
+        List<Vector3Int> player_neighbours = GetNeighbourTiles(GetPlayerGridPosition());
+        List<Vector3Int> rand_grid_position_generated = new List<Vector3Int>();
+        for (int i=0; i<_enemies.Count; i++)
+        {
+            Vector3Int rand_grid_position = new Vector3Int(Random.Range(bounds_int.xMin, bounds_int.xMax), Random.Range(bounds_int.yMin, bounds_int.yMax));
+            if (_tilemap.HasTile(rand_grid_position) && 
+                !player_neighbours.Contains(rand_grid_position) &&
+                !rand_grid_position_generated.Contains(rand_grid_position))
+            {
+                _enemies[i].transform.position = _tilemap.CellToWorld(rand_grid_position);
+                rand_grid_position_generated.Add(rand_grid_position);
+            }
+            else
+            {
+                i--;
+            }
+        }
+    }
+
     private void Start()
     {
         Vector3Int spawn_grid_position = _tilemap.WorldToCell(_spawn.position);
@@ -69,6 +91,7 @@ public class GameManager : MonoBehaviour
         _exit_grid_position = _tilemap.WorldToCell(_exit.transform.position);
         _ui_manager.HideBlackScreen();
         UpdateUIStats();
+        RandomizeEnemyPositions();
     }
 
     private void Update()
