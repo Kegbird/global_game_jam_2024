@@ -54,13 +54,6 @@ public class StandardMeleeEnemy : MonoBehaviour, IEnemy
                 }
             }
             yield return StartCoroutine(MoveToPosition(closest_position));
-            //Try to attack
-            grid_position = _game_manager.GetGridPosition(transform.position);
-            neighbour_grid_position = _game_manager.GetNeighbourTilesIgnoreDash(grid_position);
-            if (neighbour_grid_position.Contains(player_grid_position))
-            {
-                _game_manager.DamagePlayer(_damage);
-            }
         }
         yield return null;
     }

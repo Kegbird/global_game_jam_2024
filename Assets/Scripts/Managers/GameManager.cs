@@ -21,9 +21,11 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private int _enemies_to_kill;
     [SerializeField]
-    private List<GameObject> _enemies;
+    public List<GameObject> _enemies;
     [SerializeField]
     private List<GameObject> _obstacles;
+    [SerializeField]
+    private GameObject _obstacles_wrapper;
     [SerializeField]
     private UIManager _ui_manager;
     [SerializeField]
@@ -36,6 +38,8 @@ public class GameManager : MonoBehaviour
     private static int _knifes;
     [SerializeField]
     private static int _dashes;
+    [SerializeField]
+    private static int _knocks;
     [SerializeField]
     public bool _dash;
     [SerializeField]
@@ -55,7 +59,9 @@ public class GameManager : MonoBehaviour
             _hps = 3;
             _dashes = 3;
             _knifes = 3;
+            _knocks = 3;
         }
+        LoadObstacles();
         LoadEnemies();
     }
 
@@ -65,6 +71,13 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < _enemies_wrapper.transform.childCount; i++)
             _enemies.Add(_enemies_wrapper.transform.GetChild(i).gameObject);
         _enemies_to_kill = _enemies.Count;
+    }
+
+    private void LoadObstacles()
+    {
+        _obstacles = new List<GameObject>();
+        for (int i = 0; i < _obstacles_wrapper.transform.childCount; i++)
+            _obstacles.Add(_obstacles_wrapper.transform.GetChild(i).gameObject);
     }
 
     private void RandomizeEnemyPositions()
@@ -99,10 +112,6 @@ public class GameManager : MonoBehaviour
         _ui_manager.HideBlackScreen();
         UpdateUIStats();
         RandomizeEnemyPositions();
-    }
-
-    private void Update()
-    {
     }
 
     public bool IsWin()
@@ -237,6 +246,7 @@ public class GameManager : MonoBehaviour
         return near_enemies;
     }
 
+
     public void EnemyKilled()
     {
         _enemies_to_kill--;
@@ -270,12 +280,9 @@ public class GameManager : MonoBehaviour
             neighbour_tiles.Remove(_exit_grid_position);
         }
 
-        if (_obstacles != null && _obstacles.Count > 0)
+        for (int i = 0; i < _obstacles.Count; i++)
         {
-            for (int i = 0; i < _obstacles.Count; i++)
-            {
-                neighbour_tiles.Remove(_tilemap.WorldToCell(_obstacles[i].transform.position));
-            }
+            neighbour_tiles.Remove(_tilemap.WorldToCell(_obstacles[i].transform.position));
         }
 
         for (int i = 0; i < _enemies.Count; i++)
@@ -286,6 +293,34 @@ public class GameManager : MonoBehaviour
             }
         }
         return neighbour_tiles;
+    }
+
+    public List<Vector3Int> GetBombRangePositions(Vector3Int grid_position)
+    {
+        List<Vector3Int> bomb_range_positions = new List<Vector3Int>();
+
+        bomb_range_positions.Add(grid_position);
+
+        if (Mathf.Abs(grid_position.y) % 2 == 0)
+        {
+            bomb_range_positions.Add(new Vector3Int(grid_position.x - 1, grid_position.y, 0));
+            bomb_range_positions.Add(new Vector3Int(grid_position.x - 1, grid_position.y + 1, 0));
+            bomb_range_positions.Add(new Vector3Int(grid_position.x - 1, grid_position.y - 1, 0));
+            bomb_range_positions.Add(new Vector3Int(grid_position.x + 1, grid_position.y, 0));
+            bomb_range_positions.Add(new Vector3Int(grid_position.x, grid_position.y + 1, 0));
+            bomb_range_positions.Add(new Vector3Int(grid_position.x, grid_position.y - 1, 0));
+        }
+        else
+        {
+            bomb_range_positions.Add(new Vector3Int(grid_position.x - 1, grid_position.y, 0));
+            bomb_range_positions.Add(new Vector3Int(grid_position.x, grid_position.y + 1, 0));
+            bomb_range_positions.Add(new Vector3Int(grid_position.x, grid_position.y - 1, 0));
+            bomb_range_positions.Add(new Vector3Int(grid_position.x + 1, grid_position.y, 0));
+            bomb_range_positions.Add(new Vector3Int(grid_position.x + 1, grid_position.y + 1, 0));
+            bomb_range_positions.Add(new Vector3Int(grid_position.x + 1, grid_position.y - 1, 0));
+        }
+
+        return bomb_range_positions;
     }
 
     public List<Vector3Int> GetNeighbourTilesConsideringAllCells(Vector3Int grid_position)
@@ -322,58 +357,32 @@ public class GameManager : MonoBehaviour
         {
             if (Mathf.Abs(grid_position.y) % 2 == 0)
             {
-                //center(0, 0)
-                //0, 2
                 neighbour_tiles.Add(new Vector3Int(grid_position.x, grid_position.y + 2, 0));
-                //-1, 2
                 neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y + 2, 0));
-                //-2, 1
                 neighbour_tiles.Add(new Vector3Int(grid_position.x - 2, grid_position.y + 1, 0));
-                //-2, 0
                 neighbour_tiles.Add(new Vector3Int(grid_position.x - 2, grid_position.y, 0));
-                //-2, -1
                 neighbour_tiles.Add(new Vector3Int(grid_position.x - 2, grid_position.y - 1, 0));
-                //-1, -2
                 neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y - 2, 0));
-                //0, -2
                 neighbour_tiles.Add(new Vector3Int(grid_position.x, grid_position.y - 2, 0));
-                //1, -2
                 neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y - 2, 0));
-                //1, -1
                 neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y - 1, 0));
-                //2, 0
                 neighbour_tiles.Add(new Vector3Int(grid_position.x + 2, grid_position.y, 0));
-                //1, 1
                 neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y + 1, 0));
-                //1, 2
                 neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y + 2, 0));
             }
             else
             {
-                //center(1, -3)
-                //1, -1
                 neighbour_tiles.Add(new Vector3Int(grid_position.x, grid_position.y + 2, 0));
-                //0, -1
                 neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y + 2, 0));
-                //0, -2
                 neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y + 1, 0));
-                //-1, -3
                 neighbour_tiles.Add(new Vector3Int(grid_position.x - 2, grid_position.y, 0));
-                //0, -4
                 neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y - 1, 0));
-                //0,-5
                 neighbour_tiles.Add(new Vector3Int(grid_position.x - 1, grid_position.y - 2, 0));
-                //1,-5 
                 neighbour_tiles.Add(new Vector3Int(grid_position.x, grid_position.y - 2, 0));
-                //2, -5
                 neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y - 2, 0));
-                //3, -4
                 neighbour_tiles.Add(new Vector3Int(grid_position.x + 2, grid_position.y - 1, 0));
-                //3, -3
                 neighbour_tiles.Add(new Vector3Int(grid_position.x + 2, grid_position.y, 0));
-                //3, -2
                 neighbour_tiles.Add(new Vector3Int(grid_position.x + 2, grid_position.y + 1, 0));
-                //2, -1
                 neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y + 2, 0));
             }
         }
@@ -404,12 +413,9 @@ public class GameManager : MonoBehaviour
             neighbour_tiles.Remove(_exit_grid_position);
         }
 
-        if (_obstacles != null && _obstacles.Count > 0)
+        for (int i = 0; i < _obstacles.Count; i++)
         {
-            for (int i = 0; i < _obstacles.Count; i++)
-            {
-                neighbour_tiles.Remove(_tilemap.WorldToCell(_obstacles[i].transform.position));
-            }
+            neighbour_tiles.Remove(_tilemap.WorldToCell(_obstacles[i].transform.position));
         }
 
         for (int i = 0; i < _enemies.Count; i++)
