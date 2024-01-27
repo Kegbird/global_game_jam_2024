@@ -19,6 +19,8 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameObject _enemies_wrapper;
     [SerializeField]
+    private int _enemies_to_kill;
+    [SerializeField]
     private List<GameObject> _enemies;
     [SerializeField]
     private List<GameObject> _obstacles;
@@ -39,8 +41,6 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Vector3Int _exit_grid_position;
     [SerializeField]
-    private bool _win;
-    [SerializeField]
     private bool _game_over;
 
     private void Awake()
@@ -59,6 +59,7 @@ public class GameManager : MonoBehaviour
         _enemies = new List<GameObject>();
         for (int i = 0; i < _enemies_wrapper.transform.childCount; i++)
             _enemies.Add(_enemies_wrapper.transform.GetChild(i).gameObject);
+        _enemies_to_kill = _enemies.Count;
     }
 
     private void Start()
@@ -72,6 +73,11 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+    }
+
+    public bool IsWin()
+    {
+        return _enemies_to_kill == 0;
     }
 
     public bool TryToMove(Vector2 tapped_position)
@@ -165,7 +171,7 @@ public class GameManager : MonoBehaviour
             neighbour_tiles.Add(new Vector3Int(grid_position.x + 1, grid_position.y - 1, 0));
         }
 
-        if (!_win)
+        if (!IsWin())
         {
             neighbour_tiles.Remove(_exit_grid_position);
         }
@@ -271,7 +277,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if (!_win)
+        if (!IsWin())
         {
             neighbour_tiles.Remove(_exit_grid_position);
         }
@@ -290,6 +296,42 @@ public class GameManager : MonoBehaviour
         }
 
         return neighbour_tiles;
+    }
+
+    public List<Vector3Int> GetAttackablePositionsForRanged(Vector3Int enemy_position)
+    {
+        List<Vector3Int> attackable_tiles_for_ranged = new List<Vector3Int>();
+        if (Mathf.Abs(enemy_position.y) % 2 == 0)
+        {
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x, enemy_position.y + 2, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x - 1, enemy_position.y + 2, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x - 2, enemy_position.y + 1, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x - 2, enemy_position.y, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x - 2, enemy_position.y - 1, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x - 1, enemy_position.y - 2, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x, enemy_position.y - 2, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x + 1, enemy_position.y - 2, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x + 1, enemy_position.y - 1, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x + 2, enemy_position.y, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x + 1, enemy_position.y + 1, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x + 1, enemy_position.y + 2, 0));
+        }
+        else
+        {
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x, enemy_position.y + 2, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x - 1, enemy_position.y + 2, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x - 1, enemy_position.y + 1, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x - 2, enemy_position.y, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x - 1, enemy_position.y - 1, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x - 1, enemy_position.y - 2, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x, enemy_position.y - 2, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x + 1, enemy_position.y - 2, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x + 2, enemy_position.y - 1, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x + 2, enemy_position.y, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x + 2, enemy_position.y + 1, 0));
+            attackable_tiles_for_ranged.Add(new Vector3Int(enemy_position.x + 1, enemy_position.y + 2, 0));
+        }
+        return attackable_tiles_for_ranged;
     }
 
     public void DamagePlayer(int damage)
@@ -328,6 +370,8 @@ public class GameManager : MonoBehaviour
         if (!_player.GetComponent<PlayerInputController>()._active)
             return;
         _dash = true;
+        _player.GetComponent<PlayerInputController>()._selected = true;
+        HighlightPlayerMovementCells();
         _ui_manager.DisableInteractionDashButton();
     }
 

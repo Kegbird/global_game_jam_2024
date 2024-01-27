@@ -11,13 +11,11 @@ public class PlayerInputController : MonoBehaviour
     [SerializeField]
     public bool _active;
     [SerializeField]
-    private bool _editor;
-    [SerializeField]
     private GameManager _game_manager;
     [SerializeField]
     private Rigidbody2D _rigidbody;
     [SerializeField]
-    private bool _selected;
+    public bool _selected;
     [SerializeField]
     private float _movement_speed;
 
@@ -33,9 +31,9 @@ public class PlayerInputController : MonoBehaviour
         if (!_active)
             return;
 
-        if (Input.GetMouseButtonDown(0) || Input.touches.Length > 0)
+        if (Input.GetMouseButtonDown(0))
         {
-            Vector3 mouse_position = Camera.main.ScreenToWorldPoint(_editor ? Input.mousePosition : Input.touches[0].position);
+            Vector3 mouse_position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             RaycastHit2D hit = Physics2D.Raycast(mouse_position, Vector2.zero);
             if (hit.collider != null && hit.collider.tag == "Player")
             {
@@ -69,10 +67,7 @@ public class PlayerInputController : MonoBehaviour
                 }
                 else
                 {
-                    if (_game_manager._dash)
-                    {
-                        _game_manager.DisableDash();
-                    }
+                    _game_manager.DisableDash();
                 }
             }
         }
@@ -80,7 +75,7 @@ public class PlayerInputController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Exit")
+        if (collision.gameObject.tag == "Exit" && _game_manager.IsWin())
         {
             _active = false;
             StartCoroutine(_game_manager.LoadLevel(_game_manager._next_level_scene_index));

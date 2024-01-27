@@ -8,6 +8,7 @@ TagManager:
   - Logic
   - Exit
   - Enemy
+  - Obstacle
   layers:
   - Default
   - TransparentFX
@@ -17,7 +18,7 @@ TagManager:
   - UI
   - Exit
   - Enemy
-  - 
+  - Obstacle
   - 
   - 
   - 

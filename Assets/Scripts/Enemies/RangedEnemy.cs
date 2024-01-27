@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StandardMeleeEnemy : MonoBehaviour, IEnemy
+public class RangedEnemy : MonoBehaviour, IEnemy
 {
     private GameManager _game_manager;
     [SerializeField]
@@ -24,16 +24,37 @@ public class StandardMeleeEnemy : MonoBehaviour, IEnemy
 
     public IEnumerator Reason()
     {
-        if(!_game_manager.IsGameOver())
-        {
-            Vector3Int grid_position = _game_manager.GetGridPosition(transform.position);
-            Vector3Int player_grid_position = _game_manager.GetPlayerGridPosition();
-            Vector2 player_world_position = _game_manager.GetWorldPositionFromGridPosition(player_grid_position);
-            List<Vector3Int> neighbour_grid_position = _game_manager.GetNeighbourTilesIgnoreDash(grid_position);
+        Vector3Int grid_position = _game_manager.GetGridPosition(transform.position);
+        Vector3Int player_grid_position = _game_manager.GetPlayerGridPosition();
+        Vector2 player_world_position = _game_manager.GetWorldPositionFromGridPosition(player_grid_position);
 
-            if (neighbour_grid_position.Contains(player_grid_position))
+        if (CanAttackPlayer(grid_position, player_grid_position))
+        {
+            Debug.Log("attack by ranged");
+            _game_manager.DamagePlayer(_damage);
+        }
+        else
+        {
+            List<Vector3Int> neighbour_grid_position = _game_manager.GetNeighbourTilesIgnoreDash(grid_position);
+            //Se vicino, si allontana, altrimenti si avvicina
+            if (IsNearPlayer(grid_position, player_grid_position))
             {
-                _game_manager.DamagePlayer(_damage);
+                float distance = 0;
+                Vector2 farthest_position = transform.position;
+                for (int i = 0; i < neighbour_grid_position.Count; i++)
+                {
+                    if (!_game_manager.HasTile(neighbour_grid_position[i]))
+                    {
+                        continue;
+                    }
+                    Vector2 neighbour_world_position = _game_manager.GetWorldPositionFromGridPosition(neighbour_grid_position[i]);
+                    if (Vector2.Distance(neighbour_world_position, player_world_position) > distance)
+                    {
+                        distance = Vector2.Distance(neighbour_world_position, player_world_position);
+                        farthest_position = neighbour_world_position;
+                    }
+                }
+                yield return StartCoroutine(MoveToPosition(farthest_position));
             }
             else
             {
@@ -55,7 +76,20 @@ public class StandardMeleeEnemy : MonoBehaviour, IEnemy
                 yield return StartCoroutine(MoveToPosition(closest_position));
             }
         }
+
         yield return null;
+    }
+
+    private bool IsNearPlayer(Vector3Int grid_position, Vector3Int player_grid_position)
+    {
+        List<Vector3Int> neighbour_tiles = _game_manager.GetNeighbourTilesIgnoreDash(grid_position);
+        return neighbour_tiles.Contains(player_grid_position);
+    }
+
+    private bool CanAttackPlayer(Vector3Int grid_position, Vector3Int player_grid_position)
+    {
+        List<Vector3Int> attackable_tiles = _game_manager.GetAttackablePositionsForRanged(grid_position);
+        return attackable_tiles.Contains(player_grid_position);
     }
 
     private IEnumerator MoveToPosition(Vector2 target_position)

@@ -27,7 +27,7 @@ public class MainMenuManager : MonoBehaviour
         _sound_manager.PlaySoundFx(0, 0.25f);
         IEnumerator ShowBlackScreenAndPlay()
         {
-            StartCoroutine(ShowBlackScreen());
+            yield return StartCoroutine(ShowBlackScreen());
             yield return StartCoroutine(_sound_manager.FadeThemeMusic());
             SceneManager.LoadScene(Constants.GAME_SCENE);
         }
