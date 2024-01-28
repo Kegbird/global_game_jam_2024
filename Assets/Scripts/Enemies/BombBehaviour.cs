@@ -6,9 +6,11 @@ public class BombBehaviour : MonoBehaviour, IKnockable
 {
     public GameManager _game_manager;
     private Rigidbody2D _rigidbody;
+    public bool _spawned;
 
     private void Awake()
     {
+        _spawned = true;
         _rigidbody = GetComponent<Rigidbody2D>();
     }
 
@@ -19,24 +21,33 @@ public class BombBehaviour : MonoBehaviour, IKnockable
 
     public IEnumerator Boom()
     {
-        Vector3Int grid_position = _game_manager.GetGridPosition(transform.position);
-        List<Vector3Int> grid_positions_in_bomb_range = _game_manager.GetBombRangePositions(grid_position);
-        
-        List<GameObject> enemies = _game_manager._enemies;
-        Vector3Int player_grid_position = _game_manager.GetPlayerGridPosition();
-
-        if(grid_positions_in_bomb_range.Contains(player_grid_position))
+        if(_spawned)
         {
-            _game_manager.DamagePlayer(3);
+            _spawned = false;
         }
-
-        for(int i=0; i< enemies.Count; i++)
+        else
         {
-            Vector3Int enemy_grid_position = _game_manager.GetGridPosition(enemies[i].transform.position);
-            if (grid_positions_in_bomb_range.Contains(enemy_grid_position) && enemies[i].GetComponent<IEnemy>().IsAlive())
+            Vector3Int grid_position = _game_manager.GetGridPosition(transform.position);
+            List<Vector3Int> grid_positions_in_bomb_range = _game_manager.GetBombRangePositions(grid_position);
+
+            List<GameObject> enemies = _game_manager._enemies;
+            Vector3Int player_grid_position = _game_manager.GetPlayerGridPosition();
+
+            if (grid_positions_in_bomb_range.Contains(player_grid_position))
             {
-                enemies[i].GetComponent<IEnemy>().Kill();
+                _game_manager.DamagePlayer(3);
             }
+
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                Vector3Int enemy_grid_position = _game_manager.GetGridPosition(enemies[i].transform.position);
+                if (grid_positions_in_bomb_range.Contains(enemy_grid_position) && enemies[i].GetComponent<IEnemy>().IsAlive())
+                {
+                    enemies[i].GetComponent<IEnemy>().Kill();
+                }
+            }
+
+            Destroy(this.gameObject);
         }
 
         yield return null;

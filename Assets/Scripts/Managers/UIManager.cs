@@ -24,6 +24,8 @@ public class UIManager : MonoBehaviour
     private TextMeshProUGUI _hp_number_text;
     [SerializeField]
     private TextMeshProUGUI _knockback_number_text;
+    [SerializeField]
+    private Animator _offert_animator;
 
     public void ShowOfferts()
     {
@@ -32,7 +34,7 @@ public class UIManager : MonoBehaviour
 
     public void HideOfferts()
     {
-        _offert_panel.SetActive(false);
+        _offert_animator.SetTrigger("hide");
     }
 
     public void ShowBlackScreen()

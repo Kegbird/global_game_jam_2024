@@ -12,16 +12,17 @@ public class KamikazeEnemy : MonoBehaviour, IEnemy, IKnockable
     [SerializeField]
     private bool _alive;
     [SerializeField]
-    private bool _has_the_bomb;
+    private bool _stun;
     [SerializeField]
-    private GameObject _bomb;
+    private GameObject _bomb_prefab;
+    [SerializeField]
+    private Animator _animator;
 
     private void Awake()
     {
-        _has_the_bomb = true;
         _alive = true;
-        _bomb = gameObject.transform.GetChild(0).gameObject;
         _rigidbody = GetComponent<Rigidbody2D>();
+        _animator = GetComponent<Animator>();
     }
 
     private void Start()
@@ -36,6 +37,7 @@ public class KamikazeEnemy : MonoBehaviour, IEnemy, IKnockable
 
     public void Kill()
     {
+        _animator.SetTrigger("dead");
         _alive = false;
         _game_manager.EnemyKilled();
         gameObject.SetActive(false);
@@ -43,21 +45,17 @@ public class KamikazeEnemy : MonoBehaviour, IEnemy, IKnockable
 
     public IEnumerator Reason()
     {
-        Vector3Int grid_position = _game_manager.GetGridPosition(transform.position);
-        Vector3Int player_grid_position = _game_manager.GetPlayerGridPosition();
-        Vector2 player_world_position = _game_manager.GetWorldPositionFromGridPosition(player_grid_position);
-
-        if(!_has_the_bomb)
+        if(_stun)
         {
-            //Detonate
-            _has_the_bomb = false;
-            yield return StartCoroutine(_bomb.GetComponent<BombBehaviour>().Boom());
-            _bomb.SetActive(false);
-            _bomb.transform.position = transform.position;
-            _has_the_bomb = true;
+            _stun = false;
         }
         else
         {
+            Vector3Int grid_position = _game_manager.GetGridPosition(transform.position);
+            Vector3Int player_grid_position = _game_manager.GetPlayerGridPosition();
+            Vector2 player_world_position = _game_manager.GetWorldPositionFromGridPosition(player_grid_position);
+
+
             //Se in range lancia la boma
             if (CanAttackPlayer(grid_position, player_grid_position))
             {
@@ -109,17 +107,28 @@ public class KamikazeEnemy : MonoBehaviour, IEnemy, IKnockable
                     }
                     yield return StartCoroutine(MoveToPosition(closest_position));
                 }
+
+                grid_position = _game_manager.GetGridPosition(transform.position);
+                //Prova ad attaccare di nuovo
+                if (CanAttackPlayer(grid_position, player_grid_position))
+                {
+                    List<Vector3Int> player_neighbour_tiles = _game_manager.GetNeighbourTilesIgnoreDash(player_grid_position);
+                    Vector3Int target_position = player_neighbour_tiles[Random.Range(0, player_neighbour_tiles.Count)];
+                    Vector3 target_world_position = _game_manager.GetWorldPositionFromGridPosition(target_position);
+                    yield return StartCoroutine(ThrowBomb(target_world_position));
+                }
             }
+            yield return null;
         }
     }
 
     private IEnumerator ThrowBomb(Vector2 target_position)
     {
-        _has_the_bomb = false;
-        _bomb.gameObject.SetActive(true);
-        while (Vector2.Distance(_bomb.transform.position, target_position) > 0.001f)
+        GameObject bomb = GameObject.Instantiate(_bomb_prefab, transform.position, Quaternion.identity);
+        bomb.gameObject.SetActive(true);
+        while (Vector2.Distance(bomb.transform.position, target_position) > 0.001f)
         {
-            _bomb.GetComponent<Rigidbody2D>().MovePosition(Vector2.MoveTowards(_bomb.transform.position, target_position, _movement_speed * Time.fixedDeltaTime));
+            bomb.GetComponent<Rigidbody2D>().MovePosition(Vector2.MoveTowards(bomb.transform.position, target_position, _movement_speed * Time.fixedDeltaTime));
             yield return new WaitForFixedUpdate();
         }
         yield return null;
@@ -149,6 +158,7 @@ public class KamikazeEnemy : MonoBehaviour, IEnemy, IKnockable
 
     public IEnumerator Knockback()
     {
+        _stun = true;
         Vector3Int player_grid_position = _game_manager.GetPlayerGridPosition();
         Vector3 player_world_position = _game_manager.GetWorldPositionFromGridPosition(player_grid_position);
         Vector3 knockback_vector = transform.position - player_world_position;

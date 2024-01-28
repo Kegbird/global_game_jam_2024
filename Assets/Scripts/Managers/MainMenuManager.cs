@@ -5,17 +5,18 @@ using UnityEngine.UI;
 
 public class MainMenuManager : MonoBehaviour
 {
+    [SerializeField]
+    public GameObject _title;
+    [SerializeField]
+    public GameObject _play_button;
+    [SerializeField]
+    public GameObject _credits_button;
+    [SerializeField]
     public Image _black_screen;
     [SerializeField]
     private SoundManager _sound_manager;
     [SerializeField]
-    private Image _tutorial_panel;
-    [SerializeField]
     private GameObject _credits_panel;
-    [SerializeField]
-    private int _tutorial_slide_index;
-    [SerializeField]
-    private Sprite[] _slides;
 
     private void Start()
     {
@@ -34,48 +35,22 @@ public class MainMenuManager : MonoBehaviour
         StartCoroutine(ShowBlackScreenAndPlay());
     }
 
-    public void TutorialButtonClick()
-    {
-        _sound_manager.PlaySoundFx(0, 0.25f);
-        _tutorial_slide_index = 0;
-        _tutorial_panel.gameObject.SetActive(true);
-    }
-
     public void CreditsButtonClick()
     {
+        _title.SetActive(false);
+        _play_button.SetActive(false);
+        _credits_button.SetActive(false);
         _sound_manager.PlaySoundFx(0, 0.25f);
         _credits_panel.SetActive(true);
     }
 
-    public void NextButtonClick()
-    {
-        _sound_manager.PlaySoundFx(0, 0.25f);
-        _tutorial_slide_index++;
-        if (_tutorial_slide_index == 4)
-        {
-            _tutorial_slide_index = 0;
-            _tutorial_panel.gameObject.SetActive(false);
-        }
-        _tutorial_panel.sprite = _slides[_tutorial_slide_index];
-
-    }
-
     public void BackButtonClick()
     {
+        _title.SetActive(true);
+        _play_button.SetActive(true);
+        _credits_button.SetActive(true);
         _sound_manager.PlaySoundFx(0, 0.25f);
         _credits_panel.SetActive(false);
-    }
-
-    public void ExitButtonClick()
-    {
-        _sound_manager.PlaySoundFx(0, 0.25f);
-        IEnumerator ShowBlackScreenAndQuit()
-        {
-            StartCoroutine(ShowBlackScreen());
-            yield return StartCoroutine(_sound_manager.FadeThemeMusic());
-            Application.Quit();
-        }
-        StartCoroutine(ShowBlackScreenAndQuit());
     }
 
     private IEnumerator HideBlackScreen()

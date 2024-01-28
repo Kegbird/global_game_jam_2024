@@ -85,6 +85,7 @@ public class GameManager : MonoBehaviour
         _ui_manager.HideOfferts();
         _player.GetComponent<PlayerInputController>()._active = true;
         UpdateUIStats();
+        EvaluateButtonsActivation();
     }
 
     public void IncreaseHp()
@@ -94,6 +95,7 @@ public class GameManager : MonoBehaviour
         _ui_manager.HideOfferts();
         _player.GetComponent<PlayerInputController>()._active = true;
         UpdateUIStats();
+        EvaluateButtonsActivation();
     }
 
     public void IncreasKnockback()
@@ -103,6 +105,7 @@ public class GameManager : MonoBehaviour
         _ui_manager.HideOfferts();
         _player.GetComponent<PlayerInputController>()._active = true;
         UpdateUIStats();
+        EvaluateButtonsActivation();
     }
 
     public void IncreaseDash()
@@ -112,6 +115,7 @@ public class GameManager : MonoBehaviour
         _ui_manager.HideOfferts();
         _player.GetComponent<PlayerInputController>()._active = true;
         UpdateUIStats();
+        EvaluateButtonsActivation();
     }
 
     public bool IsPlayerNearAltair()
@@ -124,7 +128,7 @@ public class GameManager : MonoBehaviour
 
     private void EvaluateButtonsActivation()
     {
-        if(_knifes == 0)
+        if (_knifes == 0)
         {
             _ui_manager.DisableInteractionKnifeButton();
         }
@@ -133,7 +137,7 @@ public class GameManager : MonoBehaviour
             _ui_manager.EnableInteractionKnifeButton();
         }
 
-        if(_knockbacks == 0)
+        if (_knockbacks == 0)
         {
             _ui_manager.DisableInteractionKnockbackButton();
         }
@@ -225,11 +229,11 @@ public class GameManager : MonoBehaviour
             Vector3Int enemy_grid_position = GetGridPosition(enemy.transform.position);
             return enemy_grid_position == target_grid_position && enemy.GetComponent<IEnemy>().IsAlive();
         });
-        
-        if(enemy_to_knock == null)
+
+        if (enemy_to_knock == null)
         {
             GameObject[] bombs = GameObject.FindGameObjectsWithTag("Bomb");
-            for(int i=0; i<bombs.Length; i++)
+            for (int i = 0; i < bombs.Length; i++)
             {
                 Vector3Int bomb_grid_position = GetGridPosition(bombs[i].transform.position);
                 if (bomb_grid_position == target_grid_position && bombs[i].activeInHierarchy)
@@ -260,23 +264,33 @@ public class GameManager : MonoBehaviour
         return _game_over;
     }
 
-    public IEnumerator ActivateEnemies()
+    public IEnumerator ActivateEnemiesAndBombs()
     {
-        for (int i = 0; i < _enemies.Count; i++)
+        //Enemies
+        for (int i = 0; i < _enemies.Count && !IsGameOver(); i++)
         {
             if (_enemies[i].GetComponent<IEnemy>().IsAlive())
             {
                 IEnemy enemy_logic = _enemies[i].GetComponent<IEnemy>();
                 yield return StartCoroutine(enemy_logic.Reason());
-                if (IsGameOver())
-                {
-                    break;
-                }
             }
         }
 
+        //Bombs
+        GameObject[] bombs = GameObject.FindGameObjectsWithTag("Bomb");
+
+        for (int j = 0; j < bombs.Length && !IsGameOver(); j++)
+        {
+            yield return StartCoroutine(bombs[j].GetComponent<BombBehaviour>().Boom());
+        }
+
+
         if (_game_over)
+        {
+            _player.GetComponent<Animator>().SetTrigger("death");
+            yield return new WaitForSeconds(1f);
             StartCoroutine(LoadLevel(_game_over_scene_index));
+        }
     }
 
     public void HighlightPlayerMovementCells()

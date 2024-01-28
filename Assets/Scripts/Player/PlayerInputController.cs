@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerInputController : MonoBehaviour
@@ -137,9 +136,11 @@ public class PlayerInputController : MonoBehaviour
         List<GameObject> near_enemies = _game_manager.GetPlayerNearEnemies();
 
         for (int i = 0; i < near_enemies.Count; i++)
-            near_enemies[i].GetComponent<IEnemy>().Kill();
+        {
+            near_enemies[i].GetComponent<IEnemy>().Kill(); 
+        }
 
-        yield return StartCoroutine(_game_manager.ActivateEnemies());
+        yield return StartCoroutine(_game_manager.ActivateEnemiesAndBombs());
         if (!_game_manager.IsGameOver())
         {
             if(!_game_manager._altair_used && _game_manager.IsPlayerNearAltair())
@@ -177,7 +178,7 @@ public class PlayerInputController : MonoBehaviour
             }
         }
         yield return StartCoroutine(to_knock.GetComponent<IKnockable>().Knockback());
-        yield return StartCoroutine(_game_manager.ActivateEnemies());
+        yield return StartCoroutine(_game_manager.ActivateEnemiesAndBombs());
         if (!_game_manager.IsGameOver())
         {
             _active = true;
@@ -202,7 +203,7 @@ public class PlayerInputController : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
         _knife.gameObject.SetActive(false);
-        yield return StartCoroutine(_game_manager.ActivateEnemies());
+        yield return StartCoroutine(_game_manager.ActivateEnemiesAndBombs());
         if (!_game_manager.IsGameOver())
         {
             _active = true;
