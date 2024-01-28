@@ -9,6 +9,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
     [SerializeField]
+    private CameraManager _camera_manager;
+    [SerializeField]
     private bool _is_initial_scene;
     [SerializeField]
     public int _next_level_scene_index;
@@ -79,9 +81,10 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator RaiseMusic()
     {
+        float offset = 0.5f;
         for (float i = 0f; i<= 1f; i += Time.deltaTime)
         {
-            _music_audio_source.volume = i;
+            _music_audio_source.volume = i- offset;
             yield return new WaitForEndOfFrame();
         }
     }
@@ -680,6 +683,7 @@ public class GameManager : MonoBehaviour
 
     public void DamagePlayer(int damage)
     {
+        _camera_manager.DamageShake();
         _hps = Mathf.Clamp(_hps - damage, 0, 100);
         UpdateUIStats();
         if (_hps == 0)

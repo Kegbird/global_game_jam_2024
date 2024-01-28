@@ -18,33 +18,31 @@ public class SoundManager : MonoBehaviour
 
     public IEnumerator FadeThemeMusic()
     {
-        yield return null;
-        /*float offset = 0.5f;
+        float offset = 0.5f;
         float i = 0;
         while (i <= 1f)
         {
             i += Time.deltaTime;
             _theme_audio_source.volume = 1f - i - offset;
             yield return new WaitForEndOfFrame();
-        }*/
+        }
     }
 
     public IEnumerator RaiseThemeMusic()
     {
-        yield return null;
-        /*float offset = 0.5f;
+        float offset = 0.5f;
         float i = 1f;
         while (i >= 0)
         {
             i -= Time.deltaTime;
             _theme_audio_source.volume = 1f - i - offset;
             yield return new WaitForEndOfFrame();
-        }*/
+        }
     }
 
     public void PlaySoundFx(int index, float volume)
     {
-        //_sound_fx_audio_source.volume = volume;
-        //_sound_fx_audio_source.PlayOneShot(_sound_fx_audio_clip[index]);
+        _sound_fx_audio_source.volume = volume;
+        _sound_fx_audio_source.PlayOneShot(_sound_fx_audio_clip[index]);
     }
 }
