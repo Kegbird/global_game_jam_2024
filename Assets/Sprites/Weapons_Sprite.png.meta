@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f5f5fec927454af408d8eb645a8c7b8e
+guid: 371173b290bfe4d429fb81048974b734
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -72,7 +72,7 @@ TextureImporter:
     maxTextureSize: 1024
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 2
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -149,106 +149,64 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Knife_Icon
+      name: Arrow_Sprite
       rect:
         serializedVersion: 2
-        x: 618
-        y: 332
-        width: 72
-        height: 98
+        x: 166
+        y: 134
+        width: 33
+        height: 125
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5591973e34cac5e48b3d3d35c1d70a0d
-      internalID: 718166966
+      spriteID: 80b0f301fd11f3649a6b7c47d84792d4
+      internalID: -1442696585
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Skull_Icon
+      name: Knife_Sprite
       rect:
         serializedVersion: 2
-        x: 91
-        y: 338
-        width: 72
-        height: 85
+        x: 179
+        y: 303
+        width: 31
+        height: 96
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2772c302d8bb7c54b94b524c327232dc
-      internalID: -895258717
+      spriteID: 66c0bd3542183594793905433a57c6e0
+      internalID: -550835150
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Hp_Icon
+      name: Bomb_Sprite
       rect:
         serializedVersion: 2
-        x: 339
-        y: 340
-        width: 91
-        height: 75
+        x: 47
+        y: 20
+        width: 78
+        height: 76
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f2adb61e4c393774d8f45300d4103353
-      internalID: -1983962573
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Knockback_Icon
-      rect:
-        serializedVersion: 2
-        x: 86
-        y: 64
-        width: 100
-        height: 98
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: ce1e02a9f74055d4a8594f87c01ab75c
-      internalID: 625205573
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Dash_Icon
-      rect:
-        serializedVersion: 2
-        x: 333
-        y: 68
-        width: 99
-        height: 89
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 15d8dabd71727a1469d43cbd12c39ac2
-      internalID: 42141605
+      spriteID: 99d15da459ea640438d194b36faabf7b
+      internalID: -587758975
       vertices: []
       indices: 
       edges: []
@@ -264,15 +222,9 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Dash_Icon: 42141605
-      Hp_Icon: -1983962573
-      Knife_Icon: 718166966
-      Knockback_Icon: 625205573
-      Skull_Icon: -895258717
-      Ui_Icons_0: -1727317687
-      Ui_Icons_4: 1314541520
-      Ui_Icons_7: 1292262973
-      Ui_Icons_8: -572356180
+      Arrow_Sprite: -1442696585
+      Bomb_Sprite: -587758975
+      Knife_Sprite: -550835150
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

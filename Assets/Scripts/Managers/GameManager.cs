@@ -105,7 +105,7 @@ public class GameManager : MonoBehaviour
     public void IncreaseKnife()
     {
         _altair_used = true;
-        _knifes += 2;
+        _knifes += 1;
         _ui_manager.HideOfferts();
         _player.GetComponent<PlayerInputController>()._active = true;
         UpdateUIStats();
@@ -115,7 +115,7 @@ public class GameManager : MonoBehaviour
     public void IncreaseHp()
     {
         _altair_used = true;
-        _hps += 2;
+        _hps += 1;
         _ui_manager.HideOfferts();
         _player.GetComponent<PlayerInputController>()._active = true;
         UpdateUIStats();
@@ -125,7 +125,7 @@ public class GameManager : MonoBehaviour
     public void IncreasKnockback()
     {
         _altair_used = true;
-        _knockbacks += 2;
+        _knockbacks += 1;
         _ui_manager.HideOfferts();
         _player.GetComponent<PlayerInputController>()._active = true;
         UpdateUIStats();
@@ -135,7 +135,7 @@ public class GameManager : MonoBehaviour
     public void IncreaseDash()
     {
         _altair_used = true;
-        _dashes += 2;
+        _dashes += 1;
         _ui_manager.HideOfferts();
         _player.GetComponent<PlayerInputController>()._active = true;
         UpdateUIStats();
@@ -201,13 +201,17 @@ public class GameManager : MonoBehaviour
         Vector3Int player_grid_position = GetPlayerGridPosition();
         List<Vector3Int> player_neighbours = GetNeighbourTiles(player_grid_position);
         List<Vector3Int> rand_grid_position_generated = new List<Vector3Int>();
+        List<Vector3Int> obstacle_grid_position = new List<Vector3Int>();
+        for (int i = 0; i < _obstacles.Count; i++)
+            obstacle_grid_position.Add(_tilemap.WorldToCell(_obstacles[i].transform.position));
         for (int i = 0; i < _enemies.Count; i++)
         {
             Vector3Int rand_grid_position = new Vector3Int(Random.Range(bounds_int.xMin, bounds_int.xMax), Random.Range(bounds_int.yMin, bounds_int.yMax));
             if (_tilemap.HasTile(rand_grid_position) &&
                 !player_neighbours.Contains(rand_grid_position) &&
                 !rand_grid_position_generated.Contains(rand_grid_position) &&
-                player_grid_position != rand_grid_position)
+                player_grid_position != rand_grid_position &&
+                !obstacle_grid_position.Contains(rand_grid_position))
             {
                 _enemies[i].transform.position = _tilemap.CellToWorld(rand_grid_position);
                 rand_grid_position_generated.Add(rand_grid_position);
