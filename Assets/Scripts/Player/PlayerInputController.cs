@@ -25,6 +25,8 @@ public class PlayerInputController : MonoBehaviour
     [SerializeField]
     private AudioClip _dash_sound;
     [SerializeField]
+    private AudioClip _damage_sound;
+    [SerializeField]
     private AudioSource _audio_source;
 
     private void Awake()
@@ -145,6 +147,11 @@ public class PlayerInputController : MonoBehaviour
             _active = false;
             StartCoroutine(_game_manager.LoadLevel(_game_manager._next_level_scene_index));
         }
+    }
+
+    public void PlayDamageSound()
+    {
+        _audio_source.PlayOneShot(_damage_sound, 0.5f);
     }
 
     private IEnumerator MoveToPosition(Vector2 target_position)

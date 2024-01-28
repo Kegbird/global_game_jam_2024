@@ -35,12 +35,16 @@ public class KamikazeEnemy : MonoBehaviour, IEnemy, IKnockable
         return _alive;
     }
 
+    public void Disable()
+    {
+        this.gameObject.SetActive(false);
+    }
+
     public void Kill()
     {
         _animator.SetTrigger("dead");
         _alive = false;
         _game_manager.EnemyKilled();
-        gameObject.SetActive(false);
     }
 
     public IEnumerator Reason()

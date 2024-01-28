@@ -683,6 +683,7 @@ public class GameManager : MonoBehaviour
 
     public void DamagePlayer(int damage)
     {
+        _player.GetComponent<PlayerInputController>().PlayDamageSound();
         _camera_manager.DamageShake();
         _hps = Mathf.Clamp(_hps - damage, 0, 100);
         UpdateUIStats();

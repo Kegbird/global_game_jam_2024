@@ -147,7 +147,11 @@ public class RangedEnemy : MonoBehaviour, IEnemy, IKnockable
         _animator.SetTrigger("dead");
         _alive = false;
         _game_manager.EnemyKilled();
-        gameObject.SetActive(false);
+    }
+
+    public void Disable()
+    {
+        this.gameObject.SetActive(false);
     }
 
     public bool IsAlive()

@@ -30,6 +30,11 @@ public class StandardMeleeEnemy : MonoBehaviour, IEnemy, IKnockable
         _game_manager = GameManager.instance;
     }
 
+    public void Disable()
+    {
+        this.gameObject.SetActive(false);
+    }
+
     public IEnumerator Reason()
     {
         if (_stun)
@@ -91,7 +96,6 @@ public class StandardMeleeEnemy : MonoBehaviour, IEnemy, IKnockable
         _animator.SetTrigger("dead");
         _alive = false;
         _game_manager.EnemyKilled();
-        gameObject.SetActive(false);
     }
 
     public bool IsAlive()
