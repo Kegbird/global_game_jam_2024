@@ -16,6 +16,8 @@ public class PlayerInputController : MonoBehaviour
     private float _movement_speed;
     [SerializeField]
     private GameObject _knife;
+    [SerializeField]
+    private UIManager _ui_manager;
 
     private void Awake()
     {
@@ -44,6 +46,7 @@ public class PlayerInputController : MonoBehaviour
                     StartCoroutine(Knockback(target_position));
                     _active = false;
                     _selected = false;
+                    _ui_manager.HideYourTurn();
                 }
                 else
                 {
@@ -62,6 +65,7 @@ public class PlayerInputController : MonoBehaviour
                     StartCoroutine(ThrowKnife(target_position));
                     _active = false;
                     _selected = false;
+                    _ui_manager.HideYourTurn();
                 }
                 else
                 {
@@ -80,6 +84,7 @@ public class PlayerInputController : MonoBehaviour
                     StartCoroutine(MoveToPosition(target_position));
                     _active = false;
                     _selected = false;
+                    _ui_manager.HideYourTurn();
                 }
                 else
                 {
@@ -88,7 +93,7 @@ public class PlayerInputController : MonoBehaviour
                     _selected = false;
                 }
             }
-            if (!_game_manager._dash && !_game_manager._knife)
+            if (!_game_manager._dash && !_game_manager._knife && !_game_manager._knockback)
             {
                 if (hit.collider != null && hit.collider.tag == "Player")
                 {
@@ -106,6 +111,7 @@ public class PlayerInputController : MonoBehaviour
                             Vector2 target_position = _game_manager.GetTargetPosition(mouse_position);
                             StartCoroutine(MoveToPosition(target_position));
                             _active = false;
+                            _ui_manager.HideYourTurn();
                         }
                         else
                         {
@@ -143,7 +149,8 @@ public class PlayerInputController : MonoBehaviour
         yield return StartCoroutine(_game_manager.ActivateEnemiesAndBombs());
         if (!_game_manager.IsGameOver())
         {
-            if(!_game_manager._altair_used && _game_manager.IsPlayerNearAltair())
+            _ui_manager.ShowYourTurn();
+            if (!_game_manager._altair_used && _game_manager.IsPlayerNearAltair())
             {
                 _game_manager.ShowOfferts();
             }
@@ -181,6 +188,7 @@ public class PlayerInputController : MonoBehaviour
         yield return StartCoroutine(_game_manager.ActivateEnemiesAndBombs());
         if (!_game_manager.IsGameOver())
         {
+            _ui_manager.ShowYourTurn();
             _active = true;
         }
         yield return null;
@@ -206,6 +214,7 @@ public class PlayerInputController : MonoBehaviour
         yield return StartCoroutine(_game_manager.ActivateEnemiesAndBombs());
         if (!_game_manager.IsGameOver())
         {
+            _ui_manager.ShowYourTurn();
             _active = true;
         }
         yield return null;

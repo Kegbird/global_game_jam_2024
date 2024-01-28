@@ -15,7 +15,7 @@ public class ArrowBehaviour : MonoBehaviour
     {
         if (collision.tag == "Player")
         {
-            game_manager.DamagePlayer(2);
+            game_manager.DamagePlayer(1);
             gameObject.SetActive(false);
         }
     }

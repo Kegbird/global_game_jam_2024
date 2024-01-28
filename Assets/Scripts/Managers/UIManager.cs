@@ -26,6 +26,8 @@ public class UIManager : MonoBehaviour
     private TextMeshProUGUI _knockback_number_text;
     [SerializeField]
     private Animator _offert_animator;
+    [SerializeField]
+    private GameObject _your_turn;
 
     public void ShowOfferts()
     {
@@ -35,6 +37,16 @@ public class UIManager : MonoBehaviour
     public void HideOfferts()
     {
         _offert_animator.SetTrigger("hide");
+    }
+
+    public void ShowYourTurn()
+    {
+        _your_turn.SetActive(true);
+    }
+
+    public void HideYourTurn()
+    {
+        _your_turn.SetActive(false);
     }
 
     public void ShowBlackScreen()
@@ -54,17 +66,17 @@ public class UIManager : MonoBehaviour
 
     public void SetKnifeNumber(int knifes)
     {
-        this._knife_number_text.text = knifes.ToString();
+        this._knife_number_text.text = "x" + knifes.ToString();
     }
 
     public void SetDashNumber(int dashes)
     {
-        this._dash_number_text.text = dashes.ToString();
+        this._dash_number_text.text = "x" + dashes.ToString();
     }
 
     public void SetKnockNumber(int knockbacks)
     {
-        this._knockback_number_text.text = knockbacks.ToString();
+        this._knockback_number_text.text = "x" + knockbacks.ToString();
     }
 
     public void EnableInteractionDashButton()
