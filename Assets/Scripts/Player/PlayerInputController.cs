@@ -18,10 +18,19 @@ public class PlayerInputController : MonoBehaviour
     private GameObject _knife;
     [SerializeField]
     private UIManager _ui_manager;
+    [SerializeField]
+    private AudioClip _knife_throwing;
+    [SerializeField]
+    private AudioClip _knockback_sound;
+    [SerializeField]
+    private AudioClip _dash_sound;
+    [SerializeField]
+    private AudioSource _audio_source;
 
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
+        _audio_source = GetComponent<AudioSource>();
         _knife = gameObject.transform.GetChild(0).gameObject;
         _active = true;
     }
@@ -42,7 +51,9 @@ public class PlayerInputController : MonoBehaviour
                 {
                     _game_manager.UnhighlightKnockbackCells();
                     Vector2 target_position = _game_manager.GetTargetPosition(mouse_position);
-                    _game_manager.ConsumeKnockback();
+                    _game_manager.ConsumeKnockback(); 
+                    _audio_source.volume = 0.7f;
+                    _audio_source.PlayOneShot(_knockback_sound);
                     StartCoroutine(Knockback(target_position));
                     _active = false;
                     _selected = false;
@@ -62,6 +73,8 @@ public class PlayerInputController : MonoBehaviour
                     _game_manager.UnhighlightKnifeCells();
                     Vector2 target_position = _game_manager.GetTargetPosition(mouse_position);
                     _game_manager.ConsumeKnife();
+                    _audio_source.volume = 0.7f;
+                    _audio_source.PlayOneShot(_knife_throwing);
                     StartCoroutine(ThrowKnife(target_position));
                     _active = false;
                     _selected = false;
@@ -81,6 +94,8 @@ public class PlayerInputController : MonoBehaviour
                     _game_manager.UnhighlightPlayerMovementCells();
                     Vector2 target_position = _game_manager.GetTargetPosition(mouse_position);
                     _game_manager.ConsumeDash();
+                    _audio_source.volume = 0.7f;
+                    _audio_source.PlayOneShot(_dash_sound);
                     StartCoroutine(MoveToPosition(target_position));
                     _active = false;
                     _selected = false;
@@ -202,7 +217,7 @@ public class PlayerInputController : MonoBehaviour
         _knife.transform.position = transform.position;
         _knife.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
         _knife.transform.rotation *= Quaternion.Euler(0f, 0f, -90f);
-
+        
         _knife.gameObject.SetActive(true);
 
         while (_knife.activeInHierarchy)

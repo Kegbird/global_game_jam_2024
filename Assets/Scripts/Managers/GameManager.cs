@@ -56,6 +56,10 @@ public class GameManager : MonoBehaviour
     private GameObject _power_up_altair;
     [SerializeField]
     private bool _game_over;
+    [SerializeField]
+    private AudioSource _music_audio_source;
+    [SerializeField]
+    private Color _highligh_color = new Color(1f, 93f / 255f, 79f / 255f, 1f);
 
     private void Awake()
     {
@@ -71,6 +75,23 @@ public class GameManager : MonoBehaviour
         LoadObstacles();
         LoadEnemies();
         EvaluateButtonsActivation();
+    }
+
+    private IEnumerator RaiseMusic()
+    {
+        for (float i = 0f; i<= 1f; i += Time.deltaTime)
+        {
+            _music_audio_source.volume = i;
+            yield return new WaitForEndOfFrame();
+        }
+    }
+    private IEnumerator DecreseMusic()
+    {
+        for (float i = 1f; i >= 0f; i -= Time.deltaTime)
+        {
+            _music_audio_source.volume = i;
+            yield return new WaitForEndOfFrame();
+        }
     }
 
     public void ShowOfferts()
@@ -205,6 +226,7 @@ public class GameManager : MonoBehaviour
         _ui_manager.HideBlackScreen();
         UpdateUIStats();
         RandomizeEnemyPositions();
+        StartCoroutine(RaiseMusic());
     }
 
     public bool IsWin()
@@ -304,7 +326,7 @@ public class GameManager : MonoBehaviour
             if (!_tilemap.HasTile(neighbour_positions[i]))
                 continue;
             _tilemap.SetTileFlags(neighbour_positions[i], TileFlags.None);
-            _tilemap.SetColor(neighbour_positions[i], new Color(1f, 0f, 0f, 1f));
+            _tilemap.SetColor(neighbour_positions[i], _highligh_color);
         }
     }
 
@@ -333,7 +355,7 @@ public class GameManager : MonoBehaviour
             if (!_tilemap.HasTile(neighbour_positions[i]))
                 continue;
             _tilemap.SetTileFlags(neighbour_positions[i], TileFlags.None);
-            _tilemap.SetColor(neighbour_positions[i], new Color(1f, 0f, 0f, 1f));
+            _tilemap.SetColor(neighbour_positions[i], _highligh_color);
         }
     }
 
@@ -348,7 +370,7 @@ public class GameManager : MonoBehaviour
             if (!_tilemap.HasTile(neighbour_positions[i]))
                 continue;
             _tilemap.SetTileFlags(neighbour_positions[i], TileFlags.None);
-            _tilemap.SetColor(neighbour_positions[i], new Color(1f, 0f, 0f, 1f));
+            _tilemap.SetColor(neighbour_positions[i], _highligh_color);
         }
     }
 
@@ -781,6 +803,7 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator LoadLevel(int scene_index)
     {
+        StartCoroutine(DecreseMusic());
         _ui_manager.ShowBlackScreen();
         yield return new WaitForSeconds(1f);
         SceneManager.LoadScene(scene_index);

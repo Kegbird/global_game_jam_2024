@@ -12,7 +12,7 @@ public class CameraManager : MonoBehaviour
     private void AdjustCameraOrthographicSize()
     {
 
-        float reference_orth_size = 10f;
+        float reference_orth_size = 5f;
         float reference_aspect_ratio = 9f / 16f;
         Camera.main.orthographicSize = reference_orth_size * (reference_aspect_ratio / Camera.main.aspect);
     }
