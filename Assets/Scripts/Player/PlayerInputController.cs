@@ -35,6 +35,24 @@ public class PlayerInputController : MonoBehaviour
             Vector3 mouse_position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             RaycastHit2D hit = Physics2D.Raycast(mouse_position, Vector2.zero);
 
+            if (_game_manager._knockback)
+            {
+                if (_game_manager.TryToKnockback(mouse_position))
+                {
+                    _game_manager.UnhighlightKnockbackCells();
+                    Vector2 target_position = _game_manager.GetTargetPosition(mouse_position);
+                    _game_manager.ConsumeKnockback();
+                    StartCoroutine(Knockback(target_position));
+                    _active = false;
+                    _selected = false;
+                }
+                else
+                {
+                    _game_manager.UnhighlightKnockbackCells();
+                    _game_manager.DisableKnockback();
+                    _selected = false;
+                }
+            }
             if (_game_manager._knife)
             {
                 if (_game_manager.TryToThrow(mouse_position))
@@ -71,7 +89,7 @@ public class PlayerInputController : MonoBehaviour
                     _selected = false;
                 }
             }
-            if(!_game_manager._dash && !_game_manager._knife)
+            if (!_game_manager._dash && !_game_manager._knife)
             {
                 if (hit.collider != null && hit.collider.tag == "Player")
                 {
@@ -124,6 +142,44 @@ public class PlayerInputController : MonoBehaviour
         yield return StartCoroutine(_game_manager.ActivateEnemies());
         if (!_game_manager.IsGameOver())
         {
+            if(!_game_manager._altair_used && _game_manager.IsPlayerNearAltair())
+            {
+                _game_manager.ShowOfferts();
+            }
+            else
+            {
+                _active = true;
+            }
+        }
+        yield return null;
+    }
+
+    private IEnumerator Knockback(Vector2 target_position)
+    {
+        Vector3Int target_grid_position = _game_manager.GetGridPosition(target_position);
+        List<GameObject> enemies = _game_manager._enemies;
+        GameObject to_knock = enemies.Find((enemy) =>
+        {
+            Vector3Int enemy_grid_position = _game_manager.GetGridPosition(enemy.transform.position);
+            return enemy_grid_position == target_grid_position && enemy.GetComponent<IEnemy>().IsAlive();
+        });
+        if(to_knock == null)
+        {
+            GameObject[] bombs = GameObject.FindGameObjectsWithTag("Bomb");
+            for (int i = 0; i < bombs.Length; i++)
+            {
+                Vector3Int bomb_grid_position = _game_manager.GetGridPosition(bombs[i].transform.position);
+                if (bomb_grid_position == target_grid_position && bombs[i].activeInHierarchy)
+                {
+                    to_knock = bombs[i];
+                    break;
+                }
+            }
+        }
+        yield return StartCoroutine(to_knock.GetComponent<IKnockable>().Knockback());
+        yield return StartCoroutine(_game_manager.ActivateEnemies());
+        if (!_game_manager.IsGameOver())
+        {
             _active = true;
         }
         yield return null;
@@ -140,7 +196,7 @@ public class PlayerInputController : MonoBehaviour
 
         _knife.gameObject.SetActive(true);
 
-        while(_knife.activeInHierarchy)
+        while (_knife.activeInHierarchy)
         {
             _knife.GetComponent<Rigidbody2D>().MovePosition(_knife.transform.position + throwing_direction * 10f * Time.fixedDeltaTime);
             yield return new WaitForFixedUpdate();

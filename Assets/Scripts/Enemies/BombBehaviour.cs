@@ -2,9 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BombBehaviour : MonoBehaviour
+public class BombBehaviour : MonoBehaviour, IKnockable
 {
     public GameManager _game_manager;
+    private Rigidbody2D _rigidbody;
+
+    private void Awake()
+    {
+        _rigidbody = GetComponent<Rigidbody2D>();
+    }
 
     private void Start()
     {
@@ -33,6 +39,21 @@ public class BombBehaviour : MonoBehaviour
             }
         }
 
+        yield return null;
+    }
+
+    public IEnumerator Knockback()
+    {
+        Vector3Int player_grid_position = _game_manager.GetPlayerGridPosition();
+        Vector3 player_world_position = _game_manager.GetWorldPositionFromGridPosition(player_grid_position);
+        Vector3 knockback_vector = transform.position - player_world_position;
+        knockback_vector.Normalize();
+        Vector3 target_position = transform.position + knockback_vector;
+        while (Vector2.Distance(transform.position, target_position) > 0.001f)
+        {
+            _rigidbody.MovePosition(Vector2.MoveTowards(transform.position, target_position, 5f * Time.fixedDeltaTime));
+            yield return new WaitForFixedUpdate();
+        }
         yield return null;
     }
 

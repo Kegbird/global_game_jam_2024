@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class KamikazeEnemy : MonoBehaviour, IEnemy
+public class KamikazeEnemy : MonoBehaviour, IEnemy, IKnockable
 {
     private GameManager _game_manager;
     [SerializeField]
@@ -143,6 +143,26 @@ public class KamikazeEnemy : MonoBehaviour, IEnemy
         {
             _rigidbody.MovePosition(Vector2.MoveTowards(transform.position, target_position, _movement_speed * Time.fixedDeltaTime));
             yield return new WaitForFixedUpdate();
+        }
+        yield return null;
+    }
+
+    public IEnumerator Knockback()
+    {
+        Vector3Int player_grid_position = _game_manager.GetPlayerGridPosition();
+        Vector3 player_world_position = _game_manager.GetWorldPositionFromGridPosition(player_grid_position);
+        Vector3 knockback_vector = transform.position - player_world_position;
+        knockback_vector.Normalize();
+        Vector3 target_position = transform.position + knockback_vector;
+        while (Vector2.Distance(transform.position, target_position) > 0.001f)
+        {
+            _rigidbody.MovePosition(Vector2.MoveTowards(transform.position, target_position, 5f * Time.fixedDeltaTime));
+            yield return new WaitForFixedUpdate();
+        }
+        Vector3Int grid_position = _game_manager.GetGridPosition(transform.position);
+        if (!_game_manager.HasTile(grid_position))
+        {
+            Kill();
         }
         yield return null;
     }

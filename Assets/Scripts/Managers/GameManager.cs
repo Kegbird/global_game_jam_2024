@@ -39,30 +39,117 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private static int _dashes;
     [SerializeField]
-    private static int _knocks;
+    private static int _knockbacks;
     [SerializeField]
     public bool _dash;
     [SerializeField]
     public bool _knife;
     [SerializeField]
+    public bool _knockback;
+    [SerializeField]
     private GameObject _exit;
     [SerializeField]
     private Vector3Int _exit_grid_position;
+    [SerializeField]
+    public bool _altair_used;
+    [SerializeField]
+    private GameObject _power_up_altair;
     [SerializeField]
     private bool _game_over;
 
     private void Awake()
     {
+        _altair_used = false;
         instance = this;
         if (_is_initial_scene)
         {
             _hps = 3;
             _dashes = 3;
             _knifes = 3;
-            _knocks = 3;
+            _knockbacks = 3;
         }
         LoadObstacles();
         LoadEnemies();
+        EvaluateButtonsActivation();
+    }
+
+    public void ShowOfferts()
+    {
+        _ui_manager.ShowOfferts();
+    }
+
+    public void IncreaseKnife()
+    {
+        _altair_used = true;
+        _knifes += 2;
+        _ui_manager.HideOfferts();
+        _player.GetComponent<PlayerInputController>()._active = true;
+        UpdateUIStats();
+    }
+
+    public void IncreaseHp()
+    {
+        _altair_used = true;
+        _hps += 2;
+        _ui_manager.HideOfferts();
+        _player.GetComponent<PlayerInputController>()._active = true;
+        UpdateUIStats();
+    }
+
+    public void IncreasKnockback()
+    {
+        _altair_used = true;
+        _knockbacks += 2;
+        _ui_manager.HideOfferts();
+        _player.GetComponent<PlayerInputController>()._active = true;
+        UpdateUIStats();
+    }
+
+    public void IncreaseDash()
+    {
+        _altair_used = true;
+        _dashes += 2;
+        _ui_manager.HideOfferts();
+        _player.GetComponent<PlayerInputController>()._active = true;
+        UpdateUIStats();
+    }
+
+    public bool IsPlayerNearAltair()
+    {
+        Vector3Int player_grid_position = GetPlayerGridPosition();
+        Vector3Int altair_grid_position = GetGridPosition(_power_up_altair.transform.position);
+        List<Vector3Int> altair_grid_neighbour = GetNeighbourTiles(altair_grid_position);
+        return altair_grid_neighbour.Contains(player_grid_position);
+    }
+
+    private void EvaluateButtonsActivation()
+    {
+        if(_knifes == 0)
+        {
+            _ui_manager.DisableInteractionKnifeButton();
+        }
+        else
+        {
+            _ui_manager.EnableInteractionKnifeButton();
+        }
+
+        if(_knockbacks == 0)
+        {
+            _ui_manager.DisableInteractionKnockbackButton();
+        }
+        else
+        {
+            _ui_manager.EnableInteractionKnockbackButton();
+        }
+
+        if (_dashes == 0)
+        {
+            _ui_manager.DisableInteractionDashButton();
+        }
+        else
+        {
+            _ui_manager.EnableInteractionDashButton();
+        }
     }
 
     private void LoadEnemies()
@@ -109,6 +196,8 @@ public class GameManager : MonoBehaviour
         Vector3Int spawn_grid_position = _tilemap.WorldToCell(_spawn.position);
         _player.transform.position = _tilemap.CellToWorld(spawn_grid_position);
         _exit_grid_position = _tilemap.WorldToCell(_exit.transform.position);
+        Vector3Int _power_up_altair_grid_position = _tilemap.WorldToCell(_power_up_altair.transform.position);
+        _power_up_altair.transform.position = _tilemap.CellToWorld(_power_up_altair_grid_position);
         _ui_manager.HideBlackScreen();
         UpdateUIStats();
         RandomizeEnemyPositions();
@@ -116,7 +205,7 @@ public class GameManager : MonoBehaviour
 
     public bool IsWin()
     {
-        return _enemies_to_kill == 0;
+        return _enemies_to_kill <= 0;
     }
 
     public bool TryToMove(Vector2 tapped_position)
@@ -126,6 +215,29 @@ public class GameManager : MonoBehaviour
         List<Vector3Int> neighbour_positions = GetNeighbourTiles(player_grid_position);
 
         return neighbour_positions.Contains<Vector3Int>(tapped_cell_position) && _tilemap.HasTile(tapped_cell_position);
+    }
+
+    public bool TryToKnockback(Vector2 tapped_position)
+    {
+        Vector3Int target_grid_position = GetGridPosition(tapped_position);
+        GameObject enemy_to_knock = _enemies.Find((enemy) =>
+        {
+            Vector3Int enemy_grid_position = GetGridPosition(enemy.transform.position);
+            return enemy_grid_position == target_grid_position && enemy.GetComponent<IEnemy>().IsAlive();
+        });
+        
+        if(enemy_to_knock == null)
+        {
+            GameObject[] bombs = GameObject.FindGameObjectsWithTag("Bomb");
+            for(int i=0; i<bombs.Length; i++)
+            {
+                Vector3Int bomb_grid_position = GetGridPosition(bombs[i].transform.position);
+                if (bomb_grid_position == target_grid_position && bombs[i].activeInHierarchy)
+                    return true;
+            }
+            return false;
+        }
+        return enemy_to_knock != null;
     }
 
     public bool TryToThrow(Vector2 tapped_position)
@@ -211,7 +323,37 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void HighlightKnockbackCells()
+    {
+        Vector3Int player_grid_position = _tilemap.WorldToCell(_player.transform.position);
+
+        List<Vector3Int> neighbour_positions = GetKnifeTiles(player_grid_position);
+
+        for (int i = 0; i < neighbour_positions.Count; i++)
+        {
+            if (!_tilemap.HasTile(neighbour_positions[i]))
+                continue;
+            _tilemap.SetTileFlags(neighbour_positions[i], TileFlags.None);
+            _tilemap.SetColor(neighbour_positions[i], new Color(1f, 0f, 0f, 1f));
+        }
+    }
+
     public void UnhighlightKnifeCells()
+    {
+        Vector3Int player_grid_position = _tilemap.WorldToCell(_player.transform.position);
+
+        List<Vector3Int> neighbour_positions = GetKnifeTiles(player_grid_position);
+
+        for (int i = 0; i < neighbour_positions.Count; i++)
+        {
+            if (!_tilemap.HasTile(neighbour_positions[i]))
+                continue;
+            _tilemap.SetTileFlags(neighbour_positions[i], TileFlags.None);
+            _tilemap.SetColor(neighbour_positions[i], Color.white);
+        }
+    }
+
+    public void UnhighlightKnockbackCells()
     {
         Vector3Int player_grid_position = _tilemap.WorldToCell(_player.transform.position);
 
@@ -246,10 +388,14 @@ public class GameManager : MonoBehaviour
         return near_enemies;
     }
 
-
     public void EnemyKilled()
     {
         _enemies_to_kill--;
+    }
+
+    public Vector3Int GetKnockBackTile(Vector3Int grid_origin_position, Vector3Int grid_position)
+    {
+        return grid_position - grid_origin_position;
     }
 
     public List<Vector3Int> GetNeighbourTilesIgnoreDash(Vector3Int grid_position)
@@ -292,6 +438,8 @@ public class GameManager : MonoBehaviour
                 neighbour_tiles.Remove(_tilemap.WorldToCell(_enemies[i].transform.position));
             }
         }
+
+        neighbour_tiles.Remove(_tilemap.WorldToCell(_power_up_altair.gameObject.transform.position));
         return neighbour_tiles;
     }
 
@@ -322,6 +470,7 @@ public class GameManager : MonoBehaviour
 
         return bomb_range_positions;
     }
+
 
     public List<Vector3Int> GetNeighbourTilesConsideringAllCells(Vector3Int grid_position)
     {
@@ -425,6 +574,8 @@ public class GameManager : MonoBehaviour
                 neighbour_tiles.Remove(_tilemap.WorldToCell(_enemies[i].transform.position));
             }
         }
+
+        neighbour_tiles.Remove(_tilemap.WorldToCell(_power_up_altair.gameObject.transform.position));
 
         return neighbour_tiles;
     }
@@ -541,6 +692,16 @@ public class GameManager : MonoBehaviour
         _ui_manager.DisableInteractionKnifeButton();
     }
 
+    public void EnableKnockback()
+    {
+        if (!_player.GetComponent<PlayerInputController>()._active)
+            return;
+        _knockback = true;
+        _player.GetComponent<PlayerInputController>()._selected = true;
+        HighlightKnockbackCells();
+        _ui_manager.DisableInteractionKnockbackButton();
+    }
+
     public void DisableDash()
     {
         _dash = false;
@@ -551,6 +712,27 @@ public class GameManager : MonoBehaviour
     {
         _knife = false;
         _ui_manager.EnableInteractionKnifeButton();
+    }
+
+    public void DisableKnockback()
+    {
+        _knockback = false;
+        _ui_manager.EnableInteractionKnockbackButton();
+    }
+
+    public void ConsumeKnockback()
+    {
+        _knockbacks--;
+        _knockback = false;
+        if (_knockbacks == 0)
+        {
+            _ui_manager.DisableInteractionKnockbackButton();
+        }
+        else
+        {
+            _ui_manager.EnableInteractionKnockbackButton();
+        }
+        UpdateUIStats();
     }
 
     public void ConsumeDash()
@@ -596,6 +778,7 @@ public class GameManager : MonoBehaviour
         _ui_manager.SetDashNumber(_dashes);
         _ui_manager.SetHpNumber(_hps);
         _ui_manager.SetKnifeNumber(_knifes);
+        _ui_manager.SetKnockNumber(_knockbacks);
     }
 
 }

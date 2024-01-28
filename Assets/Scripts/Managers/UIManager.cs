@@ -13,11 +13,27 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Button _knife_button;
     [SerializeField]
+    private Button _knockback_button;
+    [SerializeField]
+    private GameObject _offert_panel;
+    [SerializeField]
     private TextMeshProUGUI _dash_number_text;
     [SerializeField]
     private TextMeshProUGUI _knife_number_text;
     [SerializeField]
     private TextMeshProUGUI _hp_number_text;
+    [SerializeField]
+    private TextMeshProUGUI _knockback_number_text;
+
+    public void ShowOfferts()
+    {
+        _offert_panel.SetActive(true);
+    }
+
+    public void HideOfferts()
+    {
+        _offert_panel.SetActive(false);
+    }
 
     public void ShowBlackScreen()
     {
@@ -44,6 +60,11 @@ public class UIManager : MonoBehaviour
         this._dash_number_text.text = dashes.ToString();
     }
 
+    public void SetKnockNumber(int knockbacks)
+    {
+        this._knockback_number_text.text = knockbacks.ToString();
+    }
+
     public void EnableInteractionDashButton()
     {
         _dash_button.interactable = true;
@@ -62,6 +83,16 @@ public class UIManager : MonoBehaviour
     public void DisableInteractionKnifeButton()
     {
         _knife_button.interactable = false;
+    }
+
+    public void EnableInteractionKnockbackButton()
+    {
+        _knockback_button.interactable = true;
+    }
+
+    public void DisableInteractionKnockbackButton()
+    {
+       _knockback_button.interactable = false;
     }
 
     public IEnumerator ShowBlackScreenUICoroutineUI(float transition_duration)
