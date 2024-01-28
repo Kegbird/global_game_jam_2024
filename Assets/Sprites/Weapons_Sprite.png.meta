@@ -157,7 +157,7 @@ TextureImporter:
         width: 33
         height: 125
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -178,7 +178,7 @@ TextureImporter:
         width: 31
         height: 96
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -191,7 +191,7 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Bomb_Sprite
+      name: Bomb_Sprite_0
       rect:
         serializedVersion: 2
         x: 47
@@ -199,7 +199,7 @@ TextureImporter:
         width: 78
         height: 76
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
@@ -207,6 +207,48 @@ TextureImporter:
       bones: []
       spriteID: 99d15da459ea640438d194b36faabf7b
       internalID: -587758975
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bomb_Sprite_1
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 19
+        width: 76
+        height: 86
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 49fed9a57b122b9419cb8f5aee5a789f
+      internalID: 947151392
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Bomb_Sprite_2
+      rect:
+        serializedVersion: 2
+        x: 296
+        y: 20
+        width: 77
+        height: 79
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 138c05767fcb17641855adfde151c6e6
+      internalID: 1654655673
       vertices: []
       indices: 
       edges: []
@@ -223,7 +265,9 @@ TextureImporter:
     secondaryTextures: []
     nameFileIdTable:
       Arrow_Sprite: -1442696585
-      Bomb_Sprite: -587758975
+      Bomb_Sprite_0: -587758975
+      Bomb_Sprite_1: 947151392
+      Bomb_Sprite_2: 1654655673
       Knife_Sprite: -550835150
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0

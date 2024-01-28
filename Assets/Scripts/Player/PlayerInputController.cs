@@ -27,6 +27,10 @@ public class PlayerInputController : MonoBehaviour
     [SerializeField]
     private AudioClip _damage_sound;
     [SerializeField]
+    private AudioClip _attack_sound;
+    [SerializeField]
+    private AudioClip _stair_sound;
+    [SerializeField]
     private AudioSource _audio_source;
 
     private void Awake()
@@ -145,6 +149,7 @@ public class PlayerInputController : MonoBehaviour
         if (collision.gameObject.tag == "Exit" && _game_manager.IsWin())
         {
             _active = false;
+            _audio_source.PlayOneShot(_stair_sound);
             StartCoroutine(_game_manager.LoadLevel(_game_manager._next_level_scene_index));
         }
     }
@@ -162,6 +167,11 @@ public class PlayerInputController : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
         List<GameObject> near_enemies = _game_manager.GetPlayerNearEnemies();
+
+        if(near_enemies.Count>0)
+        {
+            _audio_source.PlayOneShot(_attack_sound, 1f);
+        }
 
         for (int i = 0; i < near_enemies.Count; i++)
         {

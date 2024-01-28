@@ -5,12 +5,16 @@ using UnityEngine;
 public class BombBehaviour : MonoBehaviour, IKnockable
 {
     public GameManager _game_manager;
+    public Animator _bomb_animator;
     private Rigidbody2D _rigidbody;
+    [SerializeField]
+    private AudioSource _audio_source;
     public bool _spawned;
 
     private void Awake()
     {
         _spawned = true;
+        _bomb_animator = GetComponent<Animator>();
         _rigidbody = GetComponent<Rigidbody2D>();
     }
 
@@ -27,6 +31,7 @@ public class BombBehaviour : MonoBehaviour, IKnockable
         }
         else
         {
+            _audio_source.Play();
             Vector3Int grid_position = _game_manager.GetGridPosition(transform.position);
             List<Vector3Int> grid_positions_in_bomb_range = _game_manager.GetBombRangePositions(grid_position);
 
@@ -46,11 +51,15 @@ public class BombBehaviour : MonoBehaviour, IKnockable
                     enemies[i].GetComponent<IEnemy>().Kill();
                 }
             }
-
-            Destroy(this.gameObject);
+            _bomb_animator.SetTrigger("explode");
         }
 
         yield return null;
+    }
+
+    public void Destroy()
+    {
+        Destroy(this.gameObject);
     }
 
     public IEnumerator Knockback()
