@@ -114,6 +114,27 @@ public class RangedEnemy : MonoBehaviour, IEnemy, IKnockable
                     else
                         yield return StartCoroutine(MoveToPosition(closest_position));
                 }
+
+                grid_position = _game_manager.GetGridPosition(transform.position);
+                if (CanAttackPlayer(grid_position, player_grid_position) && Random.Range(0, 100)<=50)
+                {
+                    Vector3 throwing_direction = player_world_position - (Vector2)transform.position;
+                    throwing_direction.Normalize();
+                    float angle = Mathf.Atan2(throwing_direction.y, throwing_direction.x) * Mathf.Rad2Deg;
+                    _arrow.transform.position = transform.position;
+                    _arrow.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+                    _arrow.transform.rotation *= Quaternion.Euler(0f, 0f, -90f);
+
+                    _arrow.gameObject.SetActive(true);
+                    yield return new WaitForFixedUpdate();
+
+                    while (_arrow.activeInHierarchy)
+                    {
+                        _arrow.GetComponent<Rigidbody2D>().MovePosition(_arrow.transform.position + throwing_direction * 10f * Time.fixedDeltaTime);
+                        yield return new WaitForFixedUpdate();
+                    }
+                    _arrow.gameObject.SetActive(false);
+                }
             }
 
         }

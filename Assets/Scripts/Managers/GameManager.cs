@@ -15,8 +15,6 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     public int _next_level_scene_index;
     [SerializeField]
-    public int _game_over_scene_index;
-    [SerializeField]
     public GameObject _player;
     [SerializeField]
     private GameObject _enemies_wrapper;
@@ -318,7 +316,7 @@ public class GameManager : MonoBehaviour
         {
             _player.GetComponent<Animator>().SetTrigger("death");
             yield return new WaitForSeconds(1f);
-            StartCoroutine(LoadLevel(_game_over_scene_index));
+            StartCoroutine(LoadLevel(Constants.GAME_OVER_SCENE));
         }
     }
 

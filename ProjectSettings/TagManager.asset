@@ -13,6 +13,7 @@ TagManager:
   - Arrow
   - Bomb
   - PowerUp
+  - Book
   layers:
   - Default
   - TransparentFX
@@ -27,7 +28,7 @@ TagManager:
   - Arrow
   - Bomb
   - PowerUp
-  - 
+  - Book
   - 
   - 
   - 

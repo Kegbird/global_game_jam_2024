@@ -525,7 +525,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: 92558489e03139b418d0abf6378cd068, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -624,7 +624,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _black_screen: {fileID: 59257366}
-  _theme_audio_source: {fileID: 0}
+  _theme_audio_source: {fileID: 1735337225}
   _target_scene: 0
 --- !u!114 &1735337227
 MonoBehaviour:

@@ -12,6 +12,10 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField]
     public GameObject _credits_button;
     [SerializeField]
+    public GameObject _tutorial_button;
+    [SerializeField]
+    public GameObject _tutorial_panel;
+    [SerializeField]
     public Image _black_screen;
     [SerializeField]
     private SoundManager _sound_manager;
@@ -40,8 +44,19 @@ public class MainMenuManager : MonoBehaviour
         _title.SetActive(false);
         _play_button.SetActive(false);
         _credits_button.SetActive(false);
+        _tutorial_button.SetActive(false);
         _sound_manager.PlaySoundFx(0, 0.25f);
         _credits_panel.SetActive(true);
+    }
+
+    public void TutorialButtonClick()
+    {
+        _title.SetActive(false);
+        _play_button.SetActive(false);
+        _credits_button.SetActive(false);
+        _tutorial_button.SetActive(false);
+        _sound_manager.PlaySoundFx(0, 0.25f);
+        _tutorial_panel.SetActive(true);
     }
 
     public void BackButtonClick()
@@ -49,7 +64,9 @@ public class MainMenuManager : MonoBehaviour
         _title.SetActive(true);
         _play_button.SetActive(true);
         _credits_button.SetActive(true);
+        _tutorial_button.SetActive(true);
         _sound_manager.PlaySoundFx(0, 0.25f);
+        _tutorial_panel.SetActive(false);
         _credits_panel.SetActive(false);
     }
 

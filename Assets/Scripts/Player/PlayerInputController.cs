@@ -152,6 +152,11 @@ public class PlayerInputController : MonoBehaviour
             _audio_source.PlayOneShot(_stair_sound);
             StartCoroutine(_game_manager.LoadLevel(_game_manager._next_level_scene_index));
         }
+        if (collision.gameObject.tag == "Book" && _game_manager.IsWin())
+        {
+            _active = false;
+            StartCoroutine(_game_manager.LoadLevel(_game_manager._next_level_scene_index));
+        }
     }
 
     public void PlayDamageSound()
